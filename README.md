@@ -1,1 +1,1 @@
-# bcw
+# Bitay Crypto Wallet React Native application
