@@ -1,0 +1,6 @@
+Create/Import wallet page
+
+Wallet main page
+
+disable landscape orientation for iOS.
+

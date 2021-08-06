@@ -29,7 +29,8 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void sayHi(Callback errorCallback, Callback successCallback) {
-        //HDWallet wallet = HDWallet(seedPhrase, passphrase);
+    public void createWallet(Callback errorCallback, Callback successCallback) {
+        HDWallet wallet = new HDWallet(128, "");
+        successCallback.invoke(wallet.mnemonic());
     }
 }

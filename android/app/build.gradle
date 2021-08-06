@@ -194,6 +194,8 @@ dependencies {
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
+    implementation "com.trustwallet:wallet-core:$walletcore_version"
+
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
     }
@@ -214,8 +216,6 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-
-    implementation "com.trustwallet:wallet-core:$walletcore_version"
 }
 
 // Run this once to be able to run the application with BUCK
