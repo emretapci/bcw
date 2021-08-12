@@ -6,6 +6,7 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactMethod;
 import wallet.core.jni.CoinType;
 import wallet.core.jni.HDWallet;
+import wallet.core.jni.Mnemonic;
 import wallet.core.java.AnySigner;
 import wallet.core.jni.proto.Ethereum;
 import wallet.core.jni.BitcoinScript;
@@ -18,6 +19,8 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
         System.loadLibrary("TrustWalletCore");
     }
 
+    private HDWallet wallet;
+
     public WalletCoreModule(ReactApplicationContext reactContext) {
         super(reactContext); //required by React Native
     }
@@ -29,8 +32,18 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createWallet(Callback errorCallback, Callback successCallback) {
+    public void createPhrase(Callback successCallback) {
         HDWallet wallet = new HDWallet(128, "");
         successCallback.invoke(wallet.mnemonic());
+    }
+
+    @ReactMethod
+    public void importWallet(String phrase, Callback errorCallback, Callback successCallback) {
+        if (!Mnemonic.isValid(phrase)) {
+            errorCallback.invoke();
+            return;
+        }
+        wallet = new HDWallet(phrase, "");
+        successCallback.invoke();
     }
 }

@@ -1,32 +1,34 @@
 import React from 'react';
-import { BcwButton, Separator } from './Components';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { View, Image } from 'react-native';
+import { BcwButton } from './Components';
 
-export const CreateOrImportWalletScreen = () => {
+export const CreateOrImportWalletScreen = props => {
 	return (
 		<View>
 			<View style={{
-				width: wp('100%'),
-				height: hp('70%'),
+				width: '100%',
+				height: '70%',
 				justifyContent: 'center',
 				alignItems: 'center'
 			}}>
 				<Image source={require('../resources/createImportIcon.png')}
 					style={{
-						width: '80%',
-						height: '60%'
+						width: '40%',
+						height: '33%'
 					}} />
 			</View>
 			<View style={{
-				width: wp('100%'),
-				height: hp('30%'),
+				width: '100%',
+				height: '30%',
 				justifyContent: 'center',
 				alignItems: 'center'
 			}}>
-				<BcwButton emphasis='high' text='import existing wallet' />
-				<Separator visible={false} />
-				<BcwButton emphasis='low' text='create a new wallet' />
+				<View style={{ width: '80%' }}>
+					<BcwButton emphasis='high' onPress={() => props.navigation.navigate('ImportWallet')}>import existing wallet</BcwButton>
+				</View>
+				<View style={{ width: '80%' }}>
+					<BcwButton emphasis='low' onPress={() => props.navigation.navigate('CreateWallet1')}>create a new wallet</BcwButton>
+				</View>
 			</View>
 		</View >
 	);
