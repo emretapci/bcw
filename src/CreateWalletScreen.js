@@ -95,7 +95,7 @@ export const CreateWalletScreen2 = props => {
 			<Text style={styles.subheader}>
 				Write down or copy these words in the right order. You will be asked to select them in correct order.
 			</Text>
-			<Phrase phrase={phrase} />
+			<Phrase displayIndices={true} phrase={phrase} />
 			<View
 				style={{
 					alignItems: 'center',
@@ -108,7 +108,7 @@ export const CreateWalletScreen2 = props => {
 				<BcwButton style={{ width: '30%' }} onPress={() => props.navigation.navigate('CreateWallet3', { phrase })}>show qr</BcwButton>
 			</View>
 			<Warning style={{ marginTop: '10%' }}>Never share you recovery phrase with anyone and store it securely.</Warning>
-			<BcwButton emphasis='high' style={{ marginTop: '10%' }} onPress={() => props.navigation.navigate('CreateWallet3')}>continue</BcwButton>
+			<BcwButton emphasis='high' style={{ marginTop: '10%' }} onPress={() => props.navigation.navigate('CreateWallet4', { phrase })}>continue</BcwButton>
 			<Snackbar
 				visible={snackbarVisible}
 				onDismiss={() => setSnackbarVisible(false)}
@@ -134,8 +134,6 @@ export const CreateWalletScreen3 = props => {
 		.catch(error => console.log('Cannot create QR code', error)),
 		[]);
 
-	console.log(props.route);
-
 	return (
 		<View style={styles.mainContainer}>
 			<View
@@ -160,15 +158,9 @@ export const CreateWalletScreen3 = props => {
 						marginTop: 15
 					}}
 				/>
-				<Text
-					style={{
-						marginTop: '5%',
-						marginBottom: '5%',
-						textAlign: 'center',
-						fontSize: 18,
-						width: 200
-					}}
-				>This QR core contains your recovery phrase.</Text>
+				<Text style={styles.subheader}>
+					This QR core contains your recovery phrase.
+				</Text>
 			</View>
 			<Warning style={{
 				marginTop: '15%'
@@ -180,8 +172,100 @@ export const CreateWalletScreen3 = props => {
 }
 
 export const CreateWalletScreen4 = props => {
+	const [allWords, setAllWords] = useState(props.route.params.phrase.map((word, index) => ({ word, index, selected: false })).sort(() => (Math.random() > .5) ? 1 : -1));
+	const [selectedWords, setSelectedWords] = useState([]);
+	const [invalidOrder, setInvalidOrder] = useState(false);
+
+	useEffect(() => {
+		for (let i = 0; i < selectedWords.length; i++) {
+			if (selectedWords[i] != props.route.params.phrase[i]) {
+				setInvalidOrder(true);
+				return;
+			}
+		}
+		setInvalidOrder(false);
+
+		if (!invalidOrder && selectedWords.length == props.route.params.phrase.length) {
+			props.navigation.navigate('CreateWallet5');
+		}
+	}, [selectedWords]);
+
 	return (
-		<View>
-		</View>
+		<>
+			<View
+				style={{
+					...styles.mainContainer,
+					height: null,
+					flexDirection: 'column'
+				}}>
+				<Text style={styles.header}>
+					Verify recovery phrase
+				</Text>
+				<Text style={styles.subheader}>
+					Select the words below in the correct order
+				</Text>
+			</View>
+			<View
+				style={{
+					alignSelf: 'center',
+					marginTop: '3%',
+					width: '100%',
+					height: '24%',
+					alignItems: 'center',
+					elevation: 10,
+					flexDirection: 'column',
+					backgroundColor: 'white'
+				}}
+			>
+				<Phrase
+					style={{ marginTop: '2%' }}
+					displayIndices={true}
+					phrase={selectedWords}
+					touchable='all'
+					onPress={unselectedWord => {
+						setAllWords(prev => {
+							prev.filter(obj => obj.word == unselectedWord)[0].selected = false;
+							return prev;
+						});
+						setSelectedWords(prev => prev.filter(word => word != unselectedWord));
+					}}
+				/>
+			</View>
+			<View
+				style={{
+					alignSelf: 'center',
+					width: '100%',
+					height: '29%',
+					alignItems: 'center',
+					flexDirection: 'column'
+				}}
+			>
+				<Phrase
+					style={{ marginTop: '5%' }}
+					displayIndices={false}
+					phrase={allWords.filter(obj => !obj.selected).map(obj => obj.word)}
+					onPress={selectedWord => {
+						setSelectedWords(prev => [...prev, selectedWord]);
+						setAllWords(prev => {
+							prev.filter(obj => obj.word == selectedWord)[0].selected = true;
+							return prev;
+						});
+					}}
+					touchable='all'
+				/>
+			</View>
+			<View style={styles.mainContainer}>
+				{invalidOrder && <Warning>Invalid order. Please take a note of your recovery phrase.</Warning>}
+			</View>
+		</>
 	);
+}
+
+export const CreateWalletScreen5 = props => {
+	return <View
+		style={styles.mainContainer}>
+		<Text style={styles.header}>
+			Wallet created successfully.
+		</Text>
+	</View>
 }

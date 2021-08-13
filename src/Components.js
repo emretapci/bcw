@@ -83,43 +83,57 @@ export const TextInput = props => {
 }
 
 export const Chip = props => {
-	return (
-		<View
+	const chipInternal = <View
+		style={{
+			borderWidth: 3,
+			borderRadius: 25,
+			borderColor: 'gray',
+			backgroundColor: 'lightgray',
+			margin: 5,
+			alignItems: 'flex-start',
+			flexDirection: 'row'
+		}}
+	>
+		{props.displayIndex && <Text
 			style={{
-				borderWidth: 3,
-				borderRadius: 25,
-				borderColor: 'gray',
-				backgroundColor: 'lightgray',
-				margin: 10,
-				alignItems: 'flex-start',
-				flexDirection: 'row'
+				textAlign: 'center',
+				fontSize: 18,
+				paddingLeft: 6,
+				paddingRight: 6,
+				paddingBottom: 2,
+				backgroundColor: 'white',
+				borderTopLeftRadius: 25,
+				borderBottomLeftRadius: 25
 			}}
 		>
-			<Text
-				style={{
+			{props.number}
+		</Text>
+		}
+		<Text
+			style={{
+				textAlign: 'center',
+				fontSize: 18,
+				paddingLeft: 6,
+				paddingRight: 6,
+				paddingBottom: 2,
+				borderLeftWidth: props.displayIndex ? 3 : 0,
+				borderLeftColor: 'gray'
+			}}
+		>
+			{props.text}
+		</Text>
+	</View>
 
-					textAlign: 'center',
-					fontSize: 18,
-					paddingLeft: 6,
-					paddingRight: 6,
-					paddingBottom: 2,
-					backgroundColor: 'white',
-					borderTopLeftRadius: 25,
-					borderBottomLeftRadius: 25
-				}}
-			>{props.number}</Text>
-			<Text
+	return (
+		props.touchable
+			? <TouchableOpacity
+				onPress={props.onPress}
 				style={{
-					textAlign: 'center',
-					fontSize: 18,
-					paddingLeft: 6,
-					paddingRight: 6,
-					paddingBottom: 2,
-					borderLeftWidth: 3,
-					borderLeftColor: 'gray'
-				}}
-			>{props.text}</Text>
-		</View>
+					alignItems: 'center'
+				}}>
+				{chipInternal}
+			</TouchableOpacity>
+			: chipInternal
 	);
 }
 
@@ -127,14 +141,27 @@ export const Phrase = props => {
 	return (
 		<View
 			style={{
-				alignItems: 'flex-start',
-				flexDirection: 'row',
-				flexWrap: 'wrap',
-				justifyContent: 'center',
-				alignSelf: 'center'
-			}}>
-			{props.phrase.map((word, i) => <Chip text={word} number={i + 1} key={i + 1} />)}
-		</View>
+				...{
+					alignItems: 'flex-start',
+					flexDirection: 'row',
+					flexWrap: 'wrap',
+					justifyContent: 'center',
+					alignSelf: 'center'
+				},
+				...(props.style || {})
+			}}
+		>
+			{
+				props.phrase.map((word, i) => <Chip
+					onPress={() => props.onPress && props.onPress(word)}
+					displayIndex={props.displayIndices}
+					text={word}
+					number={i + 1}
+					key={i + 1}
+					touchable={(props.touchable == 'all') ? true : (props.touchable == 'last' ? (i == props.phrase.length - 1) : false)}
+				/>)
+			}
+		</View >
 	);
 }
 

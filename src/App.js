@@ -3,7 +3,7 @@ import storage from './Store'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { CreateOrImportWalletScreen } from './CreateOrImportWalletScreen'
-import { CreateWalletScreen1, CreateWalletScreen2, CreateWalletScreen3, CreateWalletScreen4 } from './CreateWalletScreen'
+import { CreateWalletScreen1, CreateWalletScreen2, CreateWalletScreen3, CreateWalletScreen4, CreateWalletScreen5 } from './CreateWalletScreen'
 import { ImportWalletScreen } from './ImportWalletScreen'
 import { WalletMainScreen } from './WalletMainScreen'
 
@@ -35,6 +35,7 @@ const App = () => {
 				<Stack.Screen name='CreateWallet2' component={CreateWalletScreen2} />
 				<Stack.Screen name='CreateWallet3' component={CreateWalletScreen3} />
 				<Stack.Screen name='CreateWallet4' component={CreateWalletScreen4} />
+				<Stack.Screen name='CreateWallet5' component={CreateWalletScreen5} />
 				<Stack.Screen name='ImportWallet' component={ImportWalletScreen} />
 				<Stack.Screen name='WalletMain' component={WalletMainScreen} />
 			</Stack.Navigator>
