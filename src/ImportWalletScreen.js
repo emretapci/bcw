@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text } from 'react-native';
-import { BcwButton, Header, TextInput } from './Components';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, NativeModules } from 'react-native';
+import { Button } from 'react-native-paper';
+import { TextInput } from './Components';
 import { messages } from './Util';
-import { NativeModules } from 'react-native';
 
 let WalletCore = NativeModules.WalletCore;
 
@@ -41,7 +42,15 @@ export const ImportWalletScreen = props => {
 		WalletCore.importWallet(phrase, () => {
 			setPhraseInError(messages['invalidPhrase']);
 		}, () => {
-			props.navigation.navigate('WalletMain', { showImportedDialog: true });
+			AsyncStorage.setItem('walletName', walletName);
+			AsyncStorage.setItem('phrase', phrase);
+			props.navigation.reset({
+				index: 0,
+				routes: [{
+					name: 'WalletMain',
+					params: { showImportedDialog: true }
+				}]
+			});
 		});
 	}
 
@@ -79,7 +88,12 @@ export const ImportWalletScreen = props => {
 						Your 12 or 24 word BIP39 phrase separated by spaces
 					</Text>
 				</View>
-				<BcwButton emphasis='high' onPress={importWallet}>import</BcwButton>
+				<Button
+					mode='contained'
+					onPress={importWallet}
+				>
+					import
+				</Button>
 			</View>
 		</View>
 	);

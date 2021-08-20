@@ -10,8 +10,8 @@
 		"lint": "eslint ."
 	},
 	"dependencies": {
+		"@react-native-async-storage/async-storage": "^1.15.6",
 		"@react-native-clipboard/clipboard": "^1.8.4",
-		"@react-native-community/async-storage": "^1.12.1",
 		"@react-navigation/native": "^6.0.1",
 		"@react-navigation/native-stack": "^6.0.2",
 		"@react-navigation/stack": "^6.0.1",

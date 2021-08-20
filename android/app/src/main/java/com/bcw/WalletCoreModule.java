@@ -32,8 +32,13 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void createWallet(String phrase) {
+        wallet = new HDWallet(phrase, "");
+    }
+
+    @ReactMethod
     public void createPhrase(Callback successCallback) {
-        HDWallet wallet = new HDWallet(128, "");
+        wallet = new HDWallet(128, "");
         successCallback.invoke(wallet.mnemonic());
     }
 
@@ -43,7 +48,13 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
             errorCallback.invoke();
             return;
         }
-        wallet = new HDWallet(phrase, "");
+        createWallet(phrase);
         successCallback.invoke();
+    }
+
+    @ReactMethod
+    public void getAddressForCoin(Integer coinType, Callback successCallback) {
+        String address = wallet.getAddressForCoin(CoinType.createFromValue(coinType));
+        successCallback.invoke(address);
     }
 }

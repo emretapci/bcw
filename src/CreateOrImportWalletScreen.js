@@ -1,10 +1,39 @@
-import React from 'react';
-import { View, Image } from 'react-native';
-import { BcwButton } from './Components';
+import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Image, NativeModules } from 'react-native';
+import { Button } from 'react-native-paper';
+import { Logo } from './Components';
+import { useEffect } from 'react';
 
 export const CreateOrImportWalletScreen = props => {
-	return (
-		<View>
+	const [showLogo, setShowLogo] = useState(true);
+
+	const logoScreenInterval = 2000;
+
+	useEffect(async () => {
+		const walletName = await AsyncStorage.getItem('walletName');
+		const phrase = await AsyncStorage.getItem('phrase');
+
+		if (walletName && phrase && walletName.trim() != '' && phrase.trim().split(/\s+/).length == 12) {
+			const WalletCore = NativeModules.WalletCore;
+			WalletCore.createWallet(phrase);
+			setTimeout(() => {
+				props.navigation.reset({
+					index: 0,
+					routes: [{ name: 'WalletMain' }]
+				});
+			}, logoScreenInterval);
+		}
+		else {
+			setTimeout(() => {
+				setShowLogo(false);
+			}, logoScreenInterval);
+		}
+	}, []);
+
+	return (showLogo
+		? <Logo />
+		: <View>
 			<View style={{
 				width: '100%',
 				height: '70%',
@@ -24,10 +53,29 @@ export const CreateOrImportWalletScreen = props => {
 				alignItems: 'center'
 			}}>
 				<View style={{ width: '80%' }}>
-					<BcwButton emphasis='high' onPress={() => props.navigation.navigate('ImportWallet')}>import existing wallet</BcwButton>
+					<Button
+						disabled={props.disabled}
+						mode={'contained'}
+						onPress={() => props.navigation.navigate('ImportWallet')}
+						style={{
+							width: '100%'
+						}}
+					>
+						import existing wallet
+					</Button>
 				</View>
 				<View style={{ width: '80%' }}>
-					<BcwButton emphasis='low' onPress={() => props.navigation.navigate('CreateWallet1')}>create a new wallet</BcwButton>
+					<Button
+						disabled={props.disabled}
+						mode={'outlined'}
+						onPress={() => props.navigation.navigate('CreateWallet')}
+						style={{
+							width: '100%',
+							marginTop: 10
+						}}
+					>
+						create a new wallet
+					</Button>
 				</View>
 			</View>
 		</View >

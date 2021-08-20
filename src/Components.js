@@ -1,57 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { TextInput as MUITextInput } from 'react-native-paper';
 
-export const BcwButton = props => {
-	let enabled = props.hasOwnProperty('enabled') ? props.enabled : true;
+export const Logo = props => {
 	return (
-		enabled ? <TouchableOpacity
-			onPress={props.onPress}
+		<View
 			style={{
-				...{
-					alignItems: 'center',
-					alignSelf: 'center',
-					backgroundColor: props.emphasis == 'high' ? 'blue' : null,
-					padding: 10,
-					width: '100%'
-				},
-				...(props.style || {})
-			}}>
-			<Text style={{ color: props.emphasis == 'high' ? 'white' : 'blue' }}>{(props.children || '').toUpperCase()}</Text>
-		</TouchableOpacity>
-			: <View
-				style={{
-					...{
-						alignItems: 'center',
-						alignSelf: 'center',
-						backgroundColor: props.emphasis == 'high' ? 'cornflowerblue' : null,
-						padding: 10,
-						width: '100%'
-					},
-					...(props.style || {})
-				}} >
-				<Text style={{ color: props.emphasis == 'high' ? 'white' : 'cornflowerblue' }}>{(props.children || '').toUpperCase()}</Text>
-			</View >
-	);
-}
-
-export const Header = props => {
-	return (
-		<View style={{
-			alignItems: 'center',
-			flexDirection: 'row',
-			width: '100%',
-			height: '5%',
-			backgroundColor: 'blue'
-		}}>
-			<TouchableOpacity onPress={props.goBack} style={{
+				flexDirection: 'column',
+				justifyContent: 'center',
 				alignItems: 'center',
-				width: '10%'
-			}}>
-				<Text style={{ color: 'white', fontSize: 22 }}>{'\u25c0'}</Text>
-			</TouchableOpacity>
-			<Text style={{ marginLeft: 10, color: 'white' }}>{props.children}</Text>
+				height: '100%'
+			}}
+		>
+			<Image
+				source={require('../resources/bitayLogo.png')}
+				style={{
+					resizeMode: 'contain',
+					width: '50%'
+				}}
+			></Image>
 		</View>
 	);
 }
@@ -187,3 +155,29 @@ export const Warning = props => {
 		</View >
 	);
 }
+
+export const styles = StyleSheet.create({
+	mainContainer: {
+		alignSelf: 'center',
+		width: '90%',
+		height: '95%',
+		justifyContent: 'flex-start'
+	},
+	header: {
+		textAlign: 'center',
+		marginTop: '7%',
+		marginBottom: '3%',
+		fontSize: 30,
+		fontWeight: 'bold'
+	},
+	subheader: {
+		textAlign: 'center',
+		marginTop: '4%',
+		marginBottom: '5%',
+		fontSize: 20
+	},
+	image: {
+		alignSelf: 'center',
+		marginTop: '10%'
+	}
+});
