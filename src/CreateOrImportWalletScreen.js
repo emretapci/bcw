@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 export const CreateOrImportWalletScreen = props => {
 	const [showLogo, setShowLogo] = useState(true);
 
-	const logoScreenInterval = 2000;
+	const logoScreenInterval = 1000;
 
 	useEffect(async () => {
 		const walletName = await AsyncStorage.getItem('walletName');

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ScrollView } from 'react-native';
 import { Avatar, List, Text, Switch } from 'react-native-paper';
-import Coins from './coinData';
+import { Coins } from './Blockchain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
@@ -47,10 +47,10 @@ const SelectCoinsScreen = props => {
 		<ScrollView>
 			<List.Section>
 				{
-					Coins.map(coin => {
-						const isEnabled = favoriteCoins.indexOf(coin.code) >= 0;
+					Object.keys(Coins).map(coinCode => {
+						const isEnabled = favoriteCoins.indexOf(coinCode) >= 0;
 						return <View
-							key={coin.code}
+							key={coinCode}
 							style={{
 								flexDirection: 'row',
 								justifyContent: 'space-between'
@@ -63,14 +63,14 @@ const SelectCoinsScreen = props => {
 									flexDirection: 'row'
 								}}
 							>
-								<Avatar.Image size={50} source={coin.logo} style={{ marginRight: 10 }} />
+								<Avatar.Image size={50} source={Coins[coinCode].logo} style={{ marginRight: 10 }} />
 								<View
 									style={{
 										marginBottom: 5,
 										flexDirection: 'column'
 									}}>
-									<Text style={{ fontSize: 20 }}>{coin.code}</Text>
-									<Text style={{ fontSize: 14 }}>{coin.name}</Text>
+									<Text style={{ fontSize: 20 }}>{coinCode}</Text>
+									<Text style={{ fontSize: 14 }}>{Coins[coinCode].name}</Text>
 								</View>
 							</View>
 							<View>
@@ -80,10 +80,10 @@ const SelectCoinsScreen = props => {
 									ios_backgroundColor="#3e3e3e"
 									onValueChange={() => setFavoriteCoins(prev => {
 										let ret;
-										if (prev.indexOf(coin.code) >= 0)
-											ret = prev.filter(c => c != coin.code)
+										if (prev.indexOf(coinCode) >= 0)
+											ret = prev.filter(c => c != coinCode)
 										else
-											ret = [...prev, coin.code];
+											ret = [...prev, coinCode];
 										AsyncStorage.setItem('favoriteCoins', JSON.stringify(ret));
 										return ret;
 									})}

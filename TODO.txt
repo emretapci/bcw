@@ -1,6 +1,5 @@
-Create/Import wallet page
-
-Wallet main page
-
 disable landscape orientation for iOS.
 
+display coin assets in WalletMain screen.
+
+display coin prices in WalletMain screen.

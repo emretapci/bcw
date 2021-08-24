@@ -9,10 +9,10 @@ import wallet.core.jni.HDWallet;
 import wallet.core.jni.Mnemonic;
 import wallet.core.java.AnySigner;
 import wallet.core.jni.proto.Ethereum;
-import wallet.core.jni.BitcoinScript;
-import wallet.core.jni.BitcoinSigHashType;
-import wallet.core.jni.proto.Bitcoin;
+import wallet.core.jni.PrivateKey;
 import java.math.BigInteger;
+import com.google.protobuf.ByteString;
+import org.json.JSONObject;
 
 public class WalletCoreModule extends ReactContextBaseJavaModule {
     static {
@@ -53,8 +53,43 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getAddressForCoin(Integer coinType, Callback successCallback) {
-        String address = wallet.getAddressForCoin(CoinType.createFromValue(coinType));
+    public void getAddressForCoin(Integer coinCode, Callback successCallback) {
+        String address = wallet.getAddressForCoin(CoinType.createFromValue(coinCode));
         successCallback.invoke(address);
+    }
+
+    @ReactMethod
+    public void createEthereumTransaction(String params, Callback successCallback) throws Exception {
+        JSONObject paramsJson = new JSONObject(params);
+
+        PrivateKey privateKey = wallet.getKeyForCoin(CoinType.ETHEREUM);
+
+        Ethereum.SigningInput signingInput = Ethereum.SigningInput.newBuilder()
+                .setChainId(ByteString.copyFrom(new BigInteger("01").toByteArray()))
+                .setGasPrice(ByteString.copyFrom(new BigInteger("d693a400", 16).toByteArray()))
+                .setGasLimit(ByteString.copyFrom(new BigInteger("5208", 16).toByteArray()))
+                .setToAddress(paramsJson.getString("to"))
+                .setNonce(ByteString.copyFrom(new BigInteger(paramsJson.getString("nonce"), 10).toByteArray()))
+                .setTransaction(Ethereum.Transaction.newBuilder()
+                        .setTransfer(Ethereum.Transaction.Transfer.newBuilder()
+                                .setAmount(ByteString.copyFrom(new BigInteger(paramsJson.getString("amountWei"), 10).toByteArray()))
+                                .build())
+                        .build())
+                .setPrivateKey(ByteString.copyFrom(privateKey.data()))
+                .build();
+
+        Ethereum.SigningOutput signerOutput = AnySigner.sign(signingInput, CoinType.ETHEREUM, Ethereum.SigningOutput.parser());
+        successCallback.invoke(toHexString(signerOutput.getEncoded().toByteArray(), true));
+    }
+
+    private String toHexString(byte[] byteArray, boolean withPrefix) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (withPrefix) {
+            stringBuilder.append("0x");
+        }
+        for (int i = 0; i < byteArray.length; i++) {
+            stringBuilder.append(String.format("%02x", byteArray[i]));
+        }
+        return stringBuilder.toString();
     }
 }

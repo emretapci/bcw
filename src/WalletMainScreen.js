@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Portal, Dialog, Paragraph, Button, IconButton, Avatar } from 'react-native-paper';
-import { NativeModules, View, Image, Text, TouchableOpacity } from 'react-native';
+import { View, Image, Text, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import Coins from './coinData';
+import { Coins, Chains, Wallet, Ethereum } from './Blockchain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WalletImportedDialog = props => {
@@ -43,33 +43,26 @@ const change = code => {
 	return Math.random() * 10 - 5;
 }
 
-const assets = code => {
-	return Math.random() * 10;
-}
-
 export const WalletMainScreen = props => {
-
 	const [totalAssetsUSD, setTotalAssetsUSD] = useState(0);
-	const [chainAddresses, setChainAddresses] = useState([]);
+	const [chains, setChains] = useState(Chains);
+	const [coins, setCoins] = useState(Object.keys(Coins).reduce((prev, cur) => Object.assign(prev, { [cur]: { assetsEth: 0 } }), {}));
 	const [walletName, setWalletName] = useState('');
-	const [phrase, setPhrase] = useState('');
 	const [favoriteCoins, setFavoriteCoins] = useState([]);
 
 	useFocusEffect(useCallback(() => {
-		AsyncStorage.getItem('walletName').then(walletName => setWalletName(walletName)).catch(err => console.log(err));
-		AsyncStorage.getItem('phrase').then(phrase => {
-			setPhrase(phrase);
-			const WalletCore = NativeModules.WalletCore;
-			WalletCore.createWallet(phrase);
-		}).catch(err => console.log(err));
+		(async () => {
+			AsyncStorage.getItem('walletName').then(walletName => setWalletName(walletName));
+			AsyncStorage.getItem('phrase').then(phrase => Wallet.createWallet(phrase));
 
-		/*Object.keys(Chains).forEach(chain => {
-			WalletCore.getAddressForCoin(Chains[chain], address => {
-				setChainAddresses(prev => Object.assign(prev, { chain, address }));
-			});
-		});*/
+			await Wallet.generateAddresses();
 
-		AsyncStorage.getItem('favoriteCoins').then(res => setFavoriteCoins(JSON.parse(res || '[]')));
+			const fetchAssets = () => Ethereum.getCoinAssets().then(assetsWei => setCoins(prev => ({ ...prev, ETH: { ...prev.ETH, assetsEth: assetsWei / 1000000000000000000 } })));
+			fetchAssets();
+			setInterval(fetchAssets, 10000);
+
+			AsyncStorage.getItem('favoriteCoins').then(res => setFavoriteCoins(JSON.parse(res || '[]')));
+		})();
 	}, []));
 
 	return (
@@ -87,7 +80,7 @@ export const WalletMainScreen = props => {
 					flexDirection: 'column',
 					backgroundColor: 'cornflowerblue',
 					width: '90%',
-					height: '35%',
+					height: '28%',
 					marginTop: '5%',
 					borderRadius: 20,
 					elevation: 15
@@ -123,7 +116,7 @@ export const WalletMainScreen = props => {
 							textAlign: 'center',
 							color: 'white',
 							fontSize: 40,
-							marginTop: 30
+							marginTop: '5%'
 						}}
 					>{'$' + totalAssetsUSD.toFixed(2)}</Text>
 					<Text
@@ -180,86 +173,7 @@ export const WalletMainScreen = props => {
 					marginTop: '5%'
 				}}
 			>
-				{favoriteCoins.map(coinCode => {
-					const coin = Coins.filter(c => c.code == coinCode)[0];
-					const coinChange = change(coinCode);
-					return <View
-						key={coinCode}
-						style={{
-							alignSelf: 'center',
-							alignItems: 'center',
-							justifyContent: 'flex-start',
-							flexDirection: 'row',
-							width: '100%',
-							height: '15%',
-							backgroundColor: 'cornflowerblue',
-							marginTop: '2%',
-							borderRadius: 20,
-							elevation: 15
-						}}>
-						<Avatar.Image size={38} source={coin.logo} />
-						<View
-							style={{
-								justifyContent: 'flex-start',
-								flexDirection: 'column',
-								width: '50%',
-								height: '100%',
-								marginLeft: 10
-							}}>
-							<Text
-								style={{
-									fontSize: 14,
-									color: 'blue'
-								}}
-							>
-								{coin.name}
-							</Text>
-							<View
-								style={{
-									justifyContent: 'flex-start',
-									flexDirection: 'row',
-									width: '50%',
-									height: '100%'
-								}}>
-								<Text
-									style={{
-										fontSize: 14,
-										color: 'blue'
-									}}
-								>
-									{'$' + price(coin.code).toFixed(2)}
-								</Text>
-								<Text
-									style={{
-										fontSize: 14,
-										color: coinChange > 0 ? 'green' : (coinChange < 0 ? 'red' : 'black'),
-										marginLeft: 10
-									}}
-								>
-									{coinChange.toFixed(2) + '%'}
-								</Text>
-							</View>
-						</View>
-						<View
-							style={{
-								marginLeft: '10%',
-								width: '30%',
-								height: '100%',
-								flexDirection: 'row',
-								justifyContent: 'flex-start',
-								alignItems: 'center'
-							}}
-						>
-							<Text
-								style={{
-									color: 'white'
-								}}
-							>
-								{assets(coinCode).toFixed(3) + ' ' + coinCode}
-							</Text>
-						</View>
-					</View>
-				})}
+				{favoriteCoins.map(coinCode => <FavCoinItem key={coinCode} coinCode={coinCode} assetsEth={coins[coinCode].assetsEth} />)}
 			</View>
 			<Button
 				mode='outlined'
@@ -281,5 +195,83 @@ export const WalletMainScreen = props => {
 				delete wallet
 			</Button>
 		</Portal.Host>
+	);
+}
+
+const FavCoinItem = props => {
+	return (
+		<View
+			style={{
+				alignSelf: 'center',
+				alignItems: 'center',
+				justifyContent: 'space-between',
+				flexDirection: 'row',
+				width: '100%',
+				height: '15%',
+				backgroundColor: 'cornflowerblue',
+				marginTop: '2%',
+				borderRadius: 20,
+				elevation: 15
+			}}>
+			<View style={{ flexDirection: 'row' }}>
+				<Avatar.Image size={38} source={Coins[props.coinCode].logo} />
+				<View
+					style={{
+						justifyContent: 'flex-start',
+						flexDirection: 'column',
+						height: '100%',
+						marginLeft: 10
+					}}>
+					<Text
+						style={{
+							fontSize: 14,
+							color: 'blue'
+						}}
+					>
+						{Coins[props.coinCode].name}
+					</Text>
+					<View
+						style={{
+							flexDirection: 'row',
+							justifyContent: 'flex-start'
+						}}>
+						<Text
+							style={{
+								fontSize: 14,
+								color: 'blue'
+							}}
+						>
+							{'$' + price(props.coinCode).toFixed(2)}
+						</Text>
+						<Text
+							style={{
+								fontSize: 14,
+								color: 'black',
+								marginLeft: 10
+							}}
+						>
+							{(0).toFixed(2) + '%'}
+						</Text>
+					</View>
+				</View>
+			</View>
+			<View
+				style={{
+					marginRight: '5%',
+					height: '100%',
+					flexDirection: 'row',
+					justifyContent: 'flex-start',
+					alignItems: 'center'
+				}}
+			>
+				<Text
+					style={{
+						color: 'white'
+					}}
+				>
+					{(props.assetsEth ? props.assetsEth.toFixed(3) : '0.000') + ' ' + Coins[props.coinCode].code}
+				</Text>
+			</View>
+		</View>
 	);
 }
