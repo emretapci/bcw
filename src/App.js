@@ -6,6 +6,7 @@ import { CreateWalletScreen } from './CreateWalletScreen'
 import { ImportWalletScreen } from './ImportWalletScreen'
 import { WalletMainScreen } from './WalletMainScreen'
 import { SettingsScreen } from './SettingsScreen'
+import { SendTransactionScreen } from './SendTransactionScreen'
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,7 @@ const App = () => {
 				<Stack.Screen name='ImportWallet' component={ImportWalletScreen} />
 				<Stack.Screen name='WalletMain' component={WalletMainScreen} />
 				<Stack.Screen name='Settings' component={SettingsScreen} />
+				<Stack.Screen name='SendTransaction' component={SendTransactionScreen} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);

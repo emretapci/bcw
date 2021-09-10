@@ -1,0 +1,26 @@
+version: '3.4'
+services:
+  ganache:
+    build:
+      context: ./ganache
+    image: ganache
+    container_name: ganache
+    hostname: ganache
+    ports:
+      - "8545:8545"
+  truffle:
+    build:
+      context: ./truffle
+    image: truffle
+    container_name: truffle
+    hostname: truffle
+    depends_on:
+      - "ganache"
+  nginx:
+    build:
+      context: ./nginx
+    image: nginx-81
+    container_name: nginx-81
+    hostname: nginx-81
+    ports:
+      - "81:81"

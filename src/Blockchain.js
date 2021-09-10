@@ -1,11 +1,12 @@
 import { NativeModules } from 'react-native';
-
-const WalletCore = NativeModules.WalletCore;
+import { fetchT } from './Util';
+import { keccak256 } from 'js-sha3';
 
 export const Chains = {
 	Ethereum: {
 		walletCoreCode: 60,
-		nodeUrl: 'http://192.168.1.20:7545'
+		nodeUrl: 'http://173.249.57.83:81/n4dAfCs1SG2p9JnaZ36BBfdbh3/'
+		//nodeUrl: 'http://192.168.1.20:8545'
 	},
 	BSC: {
 		walletCoreCode: 714
@@ -37,6 +38,14 @@ export const Chains = {
 }
 
 export const Coins = {
+	EMT: {
+		name: 'Emre Token',
+		code: 'EMT',
+		logo: require('../resources/coins/EMT.png'),
+		isNative: false,
+		chain: 'Ethereum',
+		address: '0x2bf902441123355fd860d049A8Fb214267fd3bF6'
+	},
 	AAVE: {
 		name: 'Aave',
 		code: 'AAVE',
@@ -488,62 +497,153 @@ export const Coins = {
 }
 
 export const Wallet = {
-	createWallet: phrase => WalletCore.createWallet(phrase),
-	generateAddresses: () => {
-		return new Promise(resolve => {
-			Promise.all(Object.keys(Chains).map(chainName => {
-				return new Promise(resolve => {
-					WalletCore.getAddressForCoin(Chains[chainName].walletCoreCode,
-						address => {
-							Chains[chainName].address = address;
-							resolve();
-						}
-					);
-				})
-			})).then(resolve);
-		});
+	generateAddresses: async () => {
+		await Promise.all(Object.keys(Chains).map(chainName => {
+			return new Promise(resolve => {
+				NativeModules.WalletCore.getAddressForCoin(Chains[chainName].walletCoreCode,
+					address => {
+						Chains[chainName].address = address;
+						resolve();
+					}
+				);
+			})
+		}));
 	}
 }
 
 export const Ethereum = {
-	getCoinAssets: async () => {
-		const balance = await Util.makeJsonRpcCall({
-			chainName: 'Ethereum',
-			methodName: 'eth_getBalance',
-			params: Chains['Ethereum'].address
-		});
-		return balance.result;
-	},
-	sendTransaction: async ({ to, amountWei }) => {
-		const signedTransaction = await Ethereum._createEthereumTransaction({
-			to,
-			amountWei,
-			nonce: (await Ethereum._getLatestTransactionCount(Chains['Ethereum'].address)).toString()
-		});
-		const sendTransactionResponse = await Util.makeJsonRpcCall({
-			chainName: 'Ethereum',
-			methodName: 'eth_sendRawTransaction',
-			params: [signedTransaction]
-		});
-		if (sendTransactionResponse.status == 200)
-			return sendTransactionResponse.result;
-		else
-			return null;
-	},
-	_createEthereumTransaction: async params => new Promise(resolve => WalletCore.createEthereumTransaction(JSON.stringify(params), transaction => resolve(transaction))),
-	_getLatestTransactionCount: async address => {
-		const res = await Util.makeJsonRpcCall({
-			chainName: 'Ethereum',
+	_getLatestTransactionCount: async () => {
+		const res = await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
 			methodName: 'eth_getTransactionCount',
-			params: [address, 'latest']
+			params: [Chains['Ethereum'].address, 'latest']
 		});
 		return parseInt(res.result, 16);
+	},
+
+	_getEthAssets: async () => {
+		const balance = await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
+			methodName: 'eth_getBalance',
+			params: [Chains['Ethereum'].address, 'latest']
+		});
+		return balance ? balance.result / 1000000000000000000 : null;
+	},
+
+	_getGasPrice: async () => {
+		const gasPrice = await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
+			methodName: 'eth_gasPrice'
+		});
+		return parseInt(gasPrice.result, 16);
+	},
+
+	_getGasEstimate: async () => {
+		const gasEstimate = await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
+			methodName: 'eth_estimateGas',
+			params: [{ from: Chains['Ethereum'].address }]
+		});
+		return parseInt(gasEstimate.result, 16);
 	}
 }
 
-const Util = {
-	makeJsonRpcCall: async ({ chainName, methodName, params }) => {
-		const res = await fetch(Chains[chainName].nodeUrl, {
+export const Assets = {
+	getAssets: async () => {
+		let ret = Object.keys(Coins).reduce((prev, cur) => Object.assign(prev, {
+			[cur]: {
+				assets: 0
+			}
+		}), {});
+		ret['ETH']['assets'] = await Ethereum._getEthAssets()
+		return ret;
+	}
+}
+
+export const Prices = {
+	getPrices: async () => {
+		/*try {
+			const res = await fetchT({
+				url: 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=' + Object.keys(Coins).join(','),
+				method: 'GET',
+				headers: {
+					'X-CMC_PRO_API_KEY': '93ed9c4e-186a-4185-819d-b8241bfaa8f9'
+				}
+			});
+			const data = (await res.json()).data;
+			return Object.keys(data).reduce((prev, cur) => Object.assign(prev, {
+				[cur]: {
+					price: data[cur].quote.USD.price,
+					change: data[cur].quote.USD.percent_change_1h
+				}
+			}), {});
+		}
+		catch (err) {
+			return null;
+		}*/
+		return null;
+	}
+}
+
+export const ERC20 = {
+	transfer: async (contractTo, tokenTo, tokenAmount) => {
+		const signedTransaction = await ERC20._createTransaction({
+			contractTo,
+			gasPrice: await Ethereum._getGasPrice(),
+			gasLimit: await Ethereum._getGasEstimate(),
+			nonce: await Ethereum._getLatestTransactionCount(),
+			tokenTo,
+			tokenAmount
+		});
+
+		const sendTransactionResponse = await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
+			methodName: 'eth_sendRawTransaction',
+			params: [signedTransaction]
+		});
+
+		return sendTransactionResponse;
+	},
+
+	totalSupply: async contract => {
+		const data = keccak256('totalSupply()').toString('hex').slice(0, 8);
+
+		return await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
+			methodName: 'eth_call',
+			params: [{
+				data,
+				to: contract
+			},
+				'latest']
+		});
+	},
+
+	balanceOf: async (contract, address) => {
+		const data = '0x' + keccak256('balanceOf(address)').toString('hex').slice(0, 8) +
+			address.replace('0x', '').padStart(64, '0');
+
+		const res = await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
+			methodName: 'eth_call',
+			params: [{
+				data,
+				to: contract
+			},
+				'latest']
+		});
+		const balance = parseInt(res.result, 16);
+		return Number.isNaN(balance) ? 0 : balance;
+	},
+
+	_createTransaction: tx => new Promise(resolve => NativeModules.WalletCore.createERC20Transaction(JSON.stringify(tx), data => resolve(data))),
+}
+
+const makeJsonRpcCall = async ({ url, methodName, params }) => {
+	try {
+		console.log(methodName, params);
+		const res = await fetchT({
+			url,
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -551,10 +651,13 @@ const Util = {
 			body: JSON.stringify({
 				jsonrpc: '2.0',
 				method: methodName,
-				params,
+				params: params || [],
 				id: 1
 			})
 		});
 		return await res.json();
+	}
+	catch (err) {
+		return null;
 	}
 }

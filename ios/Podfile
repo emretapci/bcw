@@ -20,6 +20,10 @@ target 'bcw' do
 
   pod 'react-native-image-editor', :path => '../node_modules/@react-native-community/image-editor'
 
+  pod 'react-native-randombytes', :path => '../node_modules/react-native-randombytes'
+
+  pod 'react-native-camera', :path => '../node_modules/react-native-camera'
+
   target 'bcwTests' do
     inherit! :complete
     # Pods for testing

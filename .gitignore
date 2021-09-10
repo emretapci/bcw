@@ -57,3 +57,8 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+
+/android/*.log
+/android/build
+/android/app/build
+*/*.hprof

@@ -10,25 +10,33 @@ export const CreateOrImportWalletScreen = props => {
 
 	const logoScreenInterval = 1000;
 
-	useEffect(async () => {
-		const walletName = await AsyncStorage.getItem('walletName');
-		const phrase = await AsyncStorage.getItem('phrase');
-
-		if (walletName && phrase && walletName.trim() != '' && phrase.trim().split(/\s+/).length == 12) {
-			const WalletCore = NativeModules.WalletCore;
-			WalletCore.createWallet(phrase);
-			setTimeout(() => {
-				props.navigation.reset({
-					index: 0,
-					routes: [{ name: 'WalletMain' }]
-				});
-			}, logoScreenInterval);
-		}
-		else {
-			setTimeout(() => {
-				setShowLogo(false);
-			}, logoScreenInterval);
-		}
+	useEffect(() => {
+		AsyncStorage.multiGet(['walletName', 'phrase']).then(values => {
+			const walletNameElement = values.find(val => val[0] == 'walletName');
+			const walletName = walletNameElement && walletNameElement[1];
+			const phraseElement = values.find(val => val[0] == 'phrase');
+			const phrase = phraseElement && phraseElement[1];
+			if (walletName && phrase && walletName.trim() != '' && phrase.trim().split(/\s+/).length == 12) {
+				NativeModules.WalletCore.importWallet(phrase,
+					() => AsyncStorage.multiRemove(['walletName', 'phrase']).then(() => setTimeout(() => setShowLogo(false), logoScreenInterval)),
+					() => {
+						setTimeout(() => {
+							props.navigation.reset({
+								index: 0,
+								routes: [{
+									name: 'WalletMain',
+									params: {
+										showImportedDialog: false
+									}
+								}]
+							});
+						}, logoScreenInterval);
+					});
+			}
+			else {
+				AsyncStorage.multiRemove(['walletName', 'phrase']).then(() => setTimeout(() => setShowLogo(false), logoScreenInterval));
+			}
+		});
 	}, []);
 
 	return (showLogo

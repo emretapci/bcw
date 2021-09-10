@@ -37,11 +37,7 @@ const SettingsMainScreen = props => {
 const SelectCoinsScreen = props => {
 	const [favoriteCoins, setFavoriteCoins] = useState([]);
 
-	useEffect(() => {
-		AsyncStorage.getItem('favoriteCoins').then(res => {
-			setFavoriteCoins(JSON.parse(res || '[]'));
-		});
-	}, []);
+	useEffect(() => AsyncStorage.getItem('favoriteCoins').then(favoriteCoins => setFavoriteCoins(JSON.parse(favoriteCoins || '[]'))), []);
 
 	return (
 		<ScrollView>

@@ -12,6 +12,8 @@ import wallet.core.jni.proto.Ethereum;
 import wallet.core.jni.PrivateKey;
 import java.math.BigInteger;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors;
+
 import org.json.JSONObject;
 
 public class WalletCoreModule extends ReactContextBaseJavaModule {
@@ -32,12 +34,7 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createWallet(String phrase) {
-        wallet = new HDWallet(phrase, "");
-    }
-
-    @ReactMethod
-    public void createPhrase(Callback successCallback) {
+    public void createWallet(Callback successCallback) {
         wallet = new HDWallet(128, "");
         successCallback.invoke(wallet.mnemonic());
     }
@@ -48,7 +45,7 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
             errorCallback.invoke();
             return;
         }
-        createWallet(phrase);
+        wallet = new HDWallet(phrase, "");
         successCallback.invoke();
     }
 
@@ -59,20 +56,21 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createEthereumTransaction(String params, Callback successCallback) throws Exception {
+    public void createERC20Transaction(String params, Callback successCallback) throws Exception {
         JSONObject paramsJson = new JSONObject(params);
 
         PrivateKey privateKey = wallet.getKeyForCoin(CoinType.ETHEREUM);
 
         Ethereum.SigningInput signingInput = Ethereum.SigningInput.newBuilder()
                 .setChainId(ByteString.copyFrom(new BigInteger("01").toByteArray()))
-                .setGasPrice(ByteString.copyFrom(new BigInteger("d693a400", 16).toByteArray()))
-                .setGasLimit(ByteString.copyFrom(new BigInteger("5208", 16).toByteArray()))
-                .setToAddress(paramsJson.getString("to"))
+                .setToAddress(paramsJson.getString("contractTo"))
+                .setGasPrice(ByteString.copyFrom((new BigInteger(paramsJson.getString("gasPrice"), 16)).toByteArray()))
+                .setGasLimit(ByteString.copyFrom((new BigInteger(paramsJson.getString("gasLimit"), 16)).toByteArray()))
                 .setNonce(ByteString.copyFrom(new BigInteger(paramsJson.getString("nonce"), 10).toByteArray()))
                 .setTransaction(Ethereum.Transaction.newBuilder()
-                        .setTransfer(Ethereum.Transaction.Transfer.newBuilder()
-                                .setAmount(ByteString.copyFrom(new BigInteger(paramsJson.getString("amountWei"), 10).toByteArray()))
+                        .setErc20Transfer(Ethereum.Transaction.ERC20Transfer.newBuilder()
+                                .setTo(paramsJson.getString("tokenTo"))
+                                .setAmount(ByteString.copyFrom(new BigInteger(paramsJson.getString("tokenAmount"), 10).toByteArray()))
                                 .build())
                         .build())
                 .setPrivateKey(ByteString.copyFrom(privateKey.data()))

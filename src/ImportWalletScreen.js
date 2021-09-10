@@ -4,6 +4,7 @@ import { View, Text, NativeModules } from 'react-native';
 import { Button } from 'react-native-paper';
 import { TextInput } from './Components';
 import { messages } from './Util';
+import global from './Global';
 
 let WalletCore = NativeModules.WalletCore;
 
@@ -44,6 +45,7 @@ export const ImportWalletScreen = props => {
 		}, () => {
 			AsyncStorage.setItem('walletName', walletName);
 			AsyncStorage.setItem('phrase', phrase);
+			global.wallet.name = walletName;
 			props.navigation.reset({
 				index: 0,
 				routes: [{

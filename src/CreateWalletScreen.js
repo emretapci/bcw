@@ -7,6 +7,7 @@ import { Phrase, Warning, TextInput, styles } from './Components';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { messages } from './Util';
 import RNQRGenerator from 'rn-qr-generator';
+import global from './Global';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,24 +29,13 @@ export const CreateWalletScreen = props => {
 
 const CreateWalletScreen1 = props => {
 	const [isEnabled, setIsEnabled] = useState(false);
-	const [phrase, setPhrase] = useState('not set');
-	const [phraseCreated, setPhraseCreated] = useState(false);
-
-	let WalletCore = NativeModules.WalletCore;
+	const [phrase, setPhrase] = useState();
 
 	const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
-	useEffect(() => WalletCore.createPhrase(phrase => {
-		setPhrase(phrase.trim().split(/\s+/));
-	}), []);
-
 	useEffect(() => {
-		if (Array.isArray(phrase) && phrase.length == 12)
-			setPhraseCreated(true);
-		else if (phrase != 'not set') {
-			console.log('wallet-core error: Cannot create BIP39 phrase.');
-		}
-	}, [phrase]);
+		NativeModules.WalletCore.createWallet(phrase => setPhrase(phrase.trim().split(/\s+/)));
+	}, []);
 
 	return (
 		<View style={styles.mainContainer}>
@@ -83,7 +73,7 @@ const CreateWalletScreen1 = props => {
 				</Text>
 			</View>
 			<Button
-				disabled={!isEnabled || !phraseCreated}
+				disabled={!isEnabled || phrase == null}
 				mode={'contained'}
 				onPress={() => props.navigation.navigate('CreateWallet2', { phrase })}
 				style={{ marginTop: 30, width: '100%' }}
@@ -170,9 +160,7 @@ const CreateWalletScreen3 = props => {
 	}).then(response => {
 		const { uri } = response;
 		setImageUri(uri);
-	})
-		.catch(error => console.log('Cannot create QR code', error)),
-		[]);
+	}), []);
 
 	return (
 		<View style={styles.mainContainer}>
@@ -357,6 +345,7 @@ const CreateWalletScreen5 = props => {
 
 		AsyncStorage.setItem('walletName', walletName);
 		AsyncStorage.setItem('phrase', props.route.params.phrase.join(' '));
+		global.wallet.name = walletName;
 
 		props.navigation.reset({
 			index: 0,
