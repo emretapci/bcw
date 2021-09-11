@@ -1,0 +1,54 @@
+Wallet: emre
+
+Available Accounts
+==================
+(0) 0x37DDaD11C786dE4599502B812A8AD3050fb52cC6 (100 ETH)
+(1) 0x9db88256060d656b3A4D0A6c78ACc89F92E466FC (100 ETH)
+(2) 0x53C6e381fFeC4f8e410e3eaB0B25863944ed1bac (100 ETH)
+(3) 0x11aDDA943A1BA5eAbB5cf338658Fb80222c0b01F (100 ETH)
+(4) 0xC0aB327Df29e2d9b0d6d93B0F07AC412F71eCbFA (100 ETH)
+(5) 0xd837297fd06A7Dc33e9cC82F37f73968bdf8a6cA (100 ETH)
+(6) 0xf947AAd09BDEf9e3502769A400FdB8C2dbA42D8E (100 ETH)
+(7) 0x776EEAde6dF8f35c149aCDD8c7c76eA35033EBc1 (100 ETH)
+(8) 0x3fa78a1676A777CF21bBD202bf1AAFb078ec53b9 (100 ETH)
+(9) 0x73695B6f8f7825ba68205f6BD2E865d88E922c5e (100 ETH)
+
+Private Keys
+==================
+(0) 0x3a8ad232ffcb3b98b5ef95985b32d53d9cd7ca6e30772fd8ebfd6cc697c5a3fd
+(1) 0x2a61ec25cf97dd8a181cdb15ecdbb66f127e70b19ef003f543d5486fb744f299
+(2) 0xf79dec06fe72696b052f2e6570a71f6f9375a30458be6b6c41848b3225dbf370
+(3) 0x92b9005e5dcc26fc0aa9b31d1286ba6f4ed85c76d55c3ac0ed06a2619994b8a6
+(4) 0x685c08d571448fd2d9435e9a9cdfa77fec5453898aeeecb6718082db0bc63fc1
+(5) 0xb2f157b292dc795cac936efa8315082e4248f3d0df7c77f0370c89677070bd83
+(6) 0xa85f29329393e77eb1566292254c508d53b4334754f173d170cec91f8b4940b4
+(7) 0x88cffddc2f7146b3a42dc40db5d2e59d1b9aa35a356a3c2bbc971ae07ff4dcb7
+(8) 0xa4bbf726a1537c892066821bfe36d7440c523f536a3f345db10c0f934f0dede4
+(9) 0x676d875bb371dd22334592cc1aaf28c2c7e237b29fb99b9224b93d877833696d
+
+HD Wallet
+==================
+Mnemonic:      cotton unveil artist whisper view expire congress dog hawk solution industry rare
+Base HD Path:  m/44'/60'/0'/0/{account_index}
+
+Gas Price
+==================
+20000000000
+
+Gas Limit
+==================
+6721975
+
+Call Gas Limit
+==================
+9007199254740991
+
+Listening on 0.0.0.0:8545
+
+
+
+---------------------------------------------------------------------------------------------------------
+
+Wallet: emre2
+
+Mnemonic:		cart raise horro property reduce relief bonus network unaware spring fury calm

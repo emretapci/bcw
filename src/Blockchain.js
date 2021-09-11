@@ -548,21 +548,9 @@ export const Ethereum = {
 	}
 }
 
-export const Assets = {
-	getAssets: async () => {
-		let ret = Object.keys(Coins).reduce((prev, cur) => Object.assign(prev, {
-			[cur]: {
-				assets: 0
-			}
-		}), {});
-		ret['ETH']['assets'] = await Ethereum._getEthAssets()
-		return ret;
-	}
-}
-
 export const Prices = {
 	getPrices: async () => {
-		/*try {
+		try {
 			const res = await fetchT({
 				url: 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=' + Object.keys(Coins).join(','),
 				method: 'GET',
@@ -571,17 +559,19 @@ export const Prices = {
 				}
 			});
 			const data = (await res.json()).data;
-			return Object.keys(data).reduce((prev, cur) => Object.assign(prev, {
-				[cur]: {
-					price: data[cur].quote.USD.price,
-					change: data[cur].quote.USD.percent_change_1h
+			const ret = Object.keys(data).reduce((all, code) => Object.assign(all, {
+				[code]: {
+					price: {
+						value: data[code].quote.USD.price,
+						change: data[code].quote.USD.percent_change_1h
+					}
 				}
 			}), {});
+			return ret;
 		}
 		catch (err) {
-			return null;
-		}*/
-		return null;
+			return {};
+		}
 	}
 }
 
@@ -641,7 +631,6 @@ export const ERC20 = {
 
 const makeJsonRpcCall = async ({ url, methodName, params }) => {
 	try {
-		console.log(methodName, params);
 		const res = await fetchT({
 			url,
 			method: 'POST',

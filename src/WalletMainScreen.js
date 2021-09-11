@@ -2,13 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Portal, Dialog, Paragraph, Button, IconButton, Avatar } from 'react-native-paper';
 import { View, Image, Text, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Coins, Chains, Wallet, Prices, Assets } from './Blockchain';
+import { Coins, Chains, Wallet, Prices, ERC20 } from './Blockchain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNQRGenerator from 'rn-qr-generator';
 import merge from 'deepmerge';
 import global from './Global';
 
-const WalletImportedDialog = props => {
+const WalletImportedDialog = () => {
 	const [visible, setVisible] = useState(true);
 
 	return (
@@ -105,34 +105,38 @@ const ReceiveQrCodeDialog = props => {
 
 export const WalletMainScreen = props => {
 	const [totalAssetsUSD, setTotalAssetsUSD] = useState(0);
-	const [coins, setCoins] = useState(Object.keys(Coins).reduce((prev, cur) => Object.assign(prev, {
-		[cur]: {
-			code: cur,
-			assets: 0
-		}
-	}), {}));
 	const [walletName, setWalletName] = useState('');
-	const [favoriteCoins, setFavoriteCoins] = useState([]);
+	const [favoriteCoinCodes, setFavoriteCoinCodes] = useState([]);
+	const [coins, setCoins] = useState(Object.keys(Coins).reduce((all, code) => merge(all, { [code]: { code } })));
 	const [showReceiveQrCodeDialog, setShowReceiveQrCodeDialog] = useState(false);
 
+	const fetchValues = () => {
+		Prices.getPrices().then(prices => setCoins(prev, merge(prev, prices)));
+
+		//ERC20 tokens
+		if (Chains['Ethereum'].address) {
+			const erc20Codes = Object.keys(Coins).filter(code => Coins[code].chain == 'Ethereum' && !Coins[code].isNative);
+			Promise.all(erc20Tokens.map(code => ERC20.balanceOf(Coins[code].address, Chains['Ethereum'].address))).then(balances => {
+				
+			});
+		}
+		/*setFavoriteCoins(favoriteCoinCodes.reduce((all, code) => merge(all, coins[code]), {}));
+		
+		setTotalAssetsUSD(Object.keys(prices).reduce((all, code) => all + coins[code].price.value * coins[code].balance));*/
+	}
+
 	useFocusEffect(useCallback(() => {
-		AsyncStorage.getItem('favoriteCoins').then(favoriteCoins => setFavoriteCoins(JSON.parse(favoriteCoins || '[]')));
-
-		Wallet.generateAddresses().then(() => console.log('Addresses generated.'));
-
-		const fetchPrices = () => Prices.getPrices().then(prices => setCoins(prev => merge(prev, prices || {})));
-		setTimeout(fetchPrices, 0);
-		const fetchPricesTimer = setInterval(fetchPrices, 60000);
+		Wallet.generateAddresses()
+			.then(() => AsyncStorage.getItem('favoriteCoins')
+				.then(favoriteCoinCodesStr => setFavoriteCoinCodes(JSON.parse(favoriteCoinCodesStr || '[]'))));
 
 		AsyncStorage.getItem('walletName').then(walletName => {
 			setWalletName(walletName);
 			global.wallet.name = walletName;
 		});
-
-		return () => {
-			clearInterval(fetchPricesTimer);
-		}
 	}, []));
+
+	useEffect(fetchValues, [favoriteCoinCodes]);
 
 	return (
 		<Portal.Host>
@@ -161,16 +165,15 @@ export const WalletMainScreen = props => {
 						justifyContent: 'flex-end'
 					}}
 				>
-					<TouchableOpacity onPress={() => props.navigation.navigate('Settings')}>
-						<Avatar.Icon
-							icon='cog'
-							size={45}
-							color='blue'
-							style={{
-								backgroundColor: null
-							}}
-						/>
-					</TouchableOpacity>
+					<IconButton
+						icon='cog'
+						size={35}
+						color='blue'
+						style={{
+							backgroundColor: null
+						}}
+						onPress={() => props.navigation.navigate('Settings')}
+					/>
 				</View>
 				<View
 					style={{
@@ -248,7 +251,7 @@ export const WalletMainScreen = props => {
 					marginTop: '5%'
 				}}
 			>
-				{favoriteCoins.map(coinCode => <FavCoinItem key={coinCode} coin={coins[coinCode]} />)}
+				{Object.keys(favoriteCoins).map(coinCode => <FavCoinItem key={coinCode} coin={favoriteCoins[coinCode]} />)}
 			</View>
 			<Button
 				mode='outlined'
@@ -316,16 +319,16 @@ const FavCoinItem = props => {
 								color: 'blue'
 							}}
 						>
-							{'$' + (props.coin.price || 0).toFixed(2)}
+							{'$' + (props.coin.price.value || 0).toFixed(2)}
 						</Text>
 						<Text
 							style={{
 								fontSize: 14,
-								color: props.coin.change ? (props.coin.change > 0 ? 'darkgreen' : (props.coin.change < 0 ? 'red' : 'black')) : 'black',
+								color: props.coin.price.change ? (props.coin.price.change > 0 ? 'darkgreen' : (props.coin.price.change < 0 ? 'red' : 'black')) : 'black',
 								marginLeft: 10
 							}}
 						>
-							{(props.coin.change || 0).toFixed(2) + '%'}
+							{(props.coin.price.change || 0).toFixed(2) + '%'}
 						</Text>
 					</View>
 				</View>
@@ -344,7 +347,7 @@ const FavCoinItem = props => {
 						color: 'white'
 					}}
 				>
-					{(props.coin.assets || 0).toFixed(3) + ' ' + props.coin.code}
+					{(props.coin.balance || 0).toFixed(3) + ' ' + props.coin.code}
 				</Text>
 			</View>
 		</View>

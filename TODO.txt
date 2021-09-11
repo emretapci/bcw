@@ -12,5 +12,3 @@ Set Ethereum URL to public ganache URL
 	ganache-cli running on docker container on contabo server at 8545:
 		[SyntaxError: JSON Parse error: Unable to parse JSON string]
 		TypeError: null is not an object (evaluating 'res.result')
-
-Fetch assets of wallet for favorite coins
