@@ -21,7 +21,7 @@ const timeout = (ms, promise) => {
 
 export const fetchT = options => {
 	return new Promise((resolve, reject) => {
-		timeout(1000, fetch(options.url, options))
+		timeout(options.duration || 1000, fetch(options.url, options))
 			.then(res => resolve(res))
 			.catch(err => reject(err));
 	});

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Wallet } from './Blockchain';
 import { View, Image, NativeModules } from 'react-native';
 import { Button } from 'react-native-paper';
 import { Logo } from './Components';
-import { useEffect } from 'react';
 
 export const CreateOrImportWalletScreen = props => {
 	const [showLogo, setShowLogo] = useState(true);
@@ -19,7 +19,7 @@ export const CreateOrImportWalletScreen = props => {
 			if (walletName && phrase && walletName.trim() != '' && phrase.trim().split(/\s+/).length == 12) {
 				NativeModules.WalletCore.importWallet(phrase,
 					() => AsyncStorage.multiRemove(['walletName', 'phrase']).then(() => setTimeout(() => setShowLogo(false), logoScreenInterval)),
-					() => {
+					() => Wallet.generateAddresses().then(() => {
 						setTimeout(() => {
 							props.navigation.reset({
 								index: 0,
@@ -30,8 +30,9 @@ export const CreateOrImportWalletScreen = props => {
 									}
 								}]
 							});
-						}, logoScreenInterval);
-					});
+						}, logoScreenInterval)
+					})
+				);
 			}
 			else {
 				AsyncStorage.multiRemove(['walletName', 'phrase']).then(() => setTimeout(() => setShowLogo(false), logoScreenInterval));

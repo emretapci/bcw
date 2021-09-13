@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Wallet } from './Blockchain';
 import { View, Image, Text, Switch, NativeModules } from 'react-native';
 import { Snackbar, Button } from 'react-native-paper';
 import { Phrase, Warning, TextInput, styles } from './Components';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { messages } from './Util';
 import RNQRGenerator from 'rn-qr-generator';
-import global from './Global';
 
 const Stack = createNativeStackNavigator();
 
@@ -85,12 +85,12 @@ const CreateWalletScreen1 = props => {
 }
 
 const CreateWalletScreen2 = props => {
+	const [snackbarVisible, setSnackbarVisible] = useState(false);
+
 	const copyPhrase = () => {
 		Clipboard.setString(props.route.params.phrase.join(' '));
 		setSnackbarVisible(true);
 	}
-
-	const [snackbarVisible, setSnackbarVisible] = useState(false);
 
 	return (
 		<View style={styles.mainContainer}>
@@ -345,12 +345,11 @@ const CreateWalletScreen5 = props => {
 
 		AsyncStorage.setItem('walletName', walletName);
 		AsyncStorage.setItem('phrase', props.route.params.phrase.join(' '));
-		global.wallet.name = walletName;
 
-		props.navigation.reset({
+		Wallet.generateAddresses().then(() => props.navigation.reset({
 			index: 0,
 			routes: [{ name: 'WalletMain' }]
-		});
+		}));
 	}
 
 	return (

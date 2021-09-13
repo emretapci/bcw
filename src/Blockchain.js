@@ -2,6 +2,8 @@ import { NativeModules } from 'react-native';
 import { fetchT } from './Util';
 import { keccak256 } from 'js-sha3';
 
+let WalletCore = NativeModules.WalletCore;
+
 export const Chains = {
 	Ethereum: {
 		walletCoreCode: 60,
@@ -497,6 +499,8 @@ export const Coins = {
 }
 
 export const Wallet = {
+	import: phrase => new Promise((resolve, reject) => WalletCore.importWallet(phrase, reject, resolve)),
+
 	generateAddresses: async () => {
 		await Promise.all(Object.keys(Chains).map(chainName => {
 			return new Promise(resolve => {
@@ -613,17 +617,23 @@ export const ERC20 = {
 		const data = '0x' + keccak256('balanceOf(address)').toString('hex').slice(0, 8) +
 			address.replace('0x', '').padStart(64, '0');
 
-		const res = await makeJsonRpcCall({
-			url: Chains['Ethereum'].nodeUrl,
-			methodName: 'eth_call',
-			params: [{
-				data,
-				to: contract
-			},
-				'latest']
-		});
-		const balance = parseInt(res.result, 16);
-		return Number.isNaN(balance) ? 0 : balance;
+		try {
+			const res = await makeJsonRpcCall({
+				url: Chains['Ethereum'].nodeUrl,
+				methodName: 'eth_call',
+				params: [{
+					data,
+					to: contract
+				},
+					'latest']
+			});
+			const balance = parseInt(res.result, 16);
+			return Number.isNaN(balance) ? 0 : balance;
+		}
+		catch(err) {
+			console.log(err);
+			return 0;
+		}
 	},
 
 	_createTransaction: tx => new Promise(resolve => NativeModules.WalletCore.createERC20Transaction(JSON.stringify(tx), data => resolve(data))),
@@ -642,11 +652,13 @@ const makeJsonRpcCall = async ({ url, methodName, params }) => {
 				method: methodName,
 				params: params || [],
 				id: 1
-			})
+			}),
+			duration: 5000
 		});
 		return await res.json();
 	}
 	catch (err) {
+		console.log(params, err);
 		return null;
 	}
 }

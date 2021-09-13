@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Portal, Dialog, Paragraph, Button, IconButton, Avatar } from 'react-native-paper';
-import { View, Image, Text, TouchableOpacity } from 'react-native';
+import { Portal, Dialog, Paragraph, Button, IconButton, Avatar, Snackbar } from 'react-native-paper';
+import { View, Image, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Coins, Chains, Wallet, Prices, ERC20 } from './Blockchain';
+import { Coins, Chains, Prices, ERC20 } from './Blockchain';
+import Clipboard from '@react-native-clipboard/clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNQRGenerator from 'rn-qr-generator';
 import merge from 'deepmerge';
-import global from './Global';
 
-const WalletImportedDialog = () => {
-	const [visible, setVisible] = useState(true);
-
+const WalletImportedDialog = props => {
 	return (
-		<Dialog visible={visible} onDismiss={() => setVisible(false)}>
+		<Dialog visible={true} onDismiss={props.close}>
 			<Image source={require('../resources/walletImported.png')}
 				style={{
 					alignSelf: 'center',
@@ -28,7 +26,7 @@ const WalletImportedDialog = () => {
 				<View style={{ padding: 10, width: '100%' }}>
 					<Button
 						mode='contained'
-						onPress={() => setVisible(false)}
+						onPress={props.close}
 					>
 						done
 					</Button>
@@ -50,8 +48,13 @@ const ReceiveQrCodeDialog = props => {
 		setImageUri(uri);
 	}), []);
 
+	const copyAddress = () => {
+		Clipboard.setString(props.address);
+		props.setSnackbarVisible(true);
+	}
+
 	return (
-		<Dialog visible={true} onDismiss={() => props.setVisible(false)}>
+		<Dialog visible={true} onDismiss={props.close}>
 			<Dialog.Content
 				style={{
 					flexDirection: 'column',
@@ -92,8 +95,19 @@ const ReceiveQrCodeDialog = props => {
 			<Dialog.Actions>
 				<View style={{ padding: 10, width: '100%' }}>
 					<Button
+						icon='content-copy'
+						size={35}
+						style={{
+							backgroundColor: '#77a1ee',
+							marginBottom: 10
+						}}
+						onPress={copyAddress}
+					>
+						copy
+					</Button>
+					<Button
 						mode='contained'
-						onPress={() => props.setVisible(false)}
+						onPress={props.close}
 					>
 						done
 					</Button>
@@ -107,33 +121,34 @@ export const WalletMainScreen = props => {
 	const [totalAssetsUSD, setTotalAssetsUSD] = useState(0);
 	const [walletName, setWalletName] = useState('');
 	const [favoriteCoinCodes, setFavoriteCoinCodes] = useState([]);
-	const [coins, setCoins] = useState(Object.keys(Coins).reduce((all, code) => merge(all, { [code]: { code } })));
+	const [coins, setCoins] = useState(Object.keys(Coins).reduce((all, code) => merge(all, { [code]: { code, price: { value: 0, change: 0 } } }), {}));
 	const [showReceiveQrCodeDialog, setShowReceiveQrCodeDialog] = useState(false);
+	const [showWalletImportedDialog, setShowWalletImportedDialog] = useState(props.route.params?.showImportedDialog);
+	const [snackbarVisible, setSnackbarVisible] = useState(false);
 
 	const fetchValues = () => {
-		Prices.getPrices().then(prices => setCoins(prev, merge(prev, prices)));
+		Prices.getPrices().then(prices => setCoins(prev => merge(prev, prices)));
 
-		//ERC20 tokens
-		if (Chains['Ethereum'].address) {
-			const erc20Codes = Object.keys(Coins).filter(code => Coins[code].chain == 'Ethereum' && !Coins[code].isNative);
-			Promise.all(erc20Tokens.map(code => ERC20.balanceOf(Coins[code].address, Chains['Ethereum'].address))).then(balances => {
-				
+		//Fetch ERC20 token assets
+		const ethAddress = Chains['Ethereum'].address;
+		const erc20Codes = Object.keys(Coins).filter(code => Coins[code].chain == 'Ethereum' && !Coins[code].isNative);
+		Promise.all(erc20Codes.map(code => ERC20.balanceOf(Coins[code].address, ethAddress))).then(balances => {
+			setCoins(prev => {
+				let newCoins = {};
+				for (let i = 0; i < erc20Codes.length; i++)
+					newCoins[erc20Codes[i]] = { balance: balances[i] };
+				return merge(prev, newCoins);
 			});
-		}
-		/*setFavoriteCoins(favoriteCoinCodes.reduce((all, code) => merge(all, coins[code]), {}));
-		
-		setTotalAssetsUSD(Object.keys(prices).reduce((all, code) => all + coins[code].price.value * coins[code].balance));*/
+		});
 	}
 
-	useFocusEffect(useCallback(() => {
-		Wallet.generateAddresses()
-			.then(() => AsyncStorage.getItem('favoriteCoins')
-				.then(favoriteCoinCodesStr => setFavoriteCoinCodes(JSON.parse(favoriteCoinCodesStr || '[]'))));
+	useEffect(() => {
+		setTotalAssetsUSD(Object.keys(coins).reduce((all, code) => all + (coins[code].price?.value || 0) * (coins[code].balance || 0), 0));
+	}, [coins])
 
-		AsyncStorage.getItem('walletName').then(walletName => {
-			setWalletName(walletName);
-			global.wallet.name = walletName;
-		});
+	useFocusEffect(useCallback(() => {
+		AsyncStorage.getItem('favoriteCoins').then(favoriteCoinCodesStr => setFavoriteCoinCodes(JSON.parse(favoriteCoinCodesStr || '[]')));
+		AsyncStorage.getItem('walletName').then(walletName => setWalletName(walletName));
 	}, []));
 
 	useEffect(fetchValues, [favoriteCoinCodes]);
@@ -141,8 +156,8 @@ export const WalletMainScreen = props => {
 	return (
 		<Portal.Host>
 			<Portal>
-				{props.route.params && props.route.params.showImportedDialog && <WalletImportedDialog />}
-				{showReceiveQrCodeDialog && <ReceiveQrCodeDialog setVisible={setShowReceiveQrCodeDialog} address={Chains['Ethereum'].address} />}
+				{showWalletImportedDialog && <WalletImportedDialog close={() => setShowWalletImportedDialog(false)} />}
+				{showReceiveQrCodeDialog && <ReceiveQrCodeDialog setSnackbarVisible={setSnackbarVisible} close={() => setShowReceiveQrCodeDialog(false)} address={Chains['Ethereum'].address} />}
 			</Portal>
 			<View
 				style={{
@@ -162,9 +177,18 @@ export const WalletMainScreen = props => {
 						width: '100%',
 						height: '10%',
 						flexDirection: 'row',
-						justifyContent: 'flex-end'
+						justifyContent: 'space-between'
 					}}
 				>
+					<IconButton
+						icon='refresh'
+						size={35}
+						color='blue'
+						style={{
+							backgroundColor: null
+						}}
+						onPress={fetchValues}
+					/>
 					<IconButton
 						icon='cog'
 						size={35}
@@ -208,7 +232,7 @@ export const WalletMainScreen = props => {
 					{[{
 						text: 'send',
 						icon: 'upload-multiple',
-						onPress: () => { props.navigation.navigate('SendTransaction') }
+						onPress: () => props.navigation.navigate('SendTransaction', { walletName })
 					},
 					{
 						text: 'receive',
@@ -251,7 +275,7 @@ export const WalletMainScreen = props => {
 					marginTop: '5%'
 				}}
 			>
-				{Object.keys(favoriteCoins).map(coinCode => <FavCoinItem key={coinCode} coin={favoriteCoins[coinCode]} />)}
+				{favoriteCoinCodes.map(code => <FavCoinItem key={code} coin={coins[code]} />)}
 			</View>
 			<Button
 				mode='outlined'
@@ -272,6 +296,13 @@ export const WalletMainScreen = props => {
 			>
 				delete wallet
 			</Button>
+			<Snackbar
+				visible={snackbarVisible}
+				onDismiss={() => setSnackbarVisible(false)}
+				duration={1000}
+			>
+				Address copied.
+			</Snackbar>
 		</Portal.Host>
 	);
 }
@@ -324,7 +355,7 @@ const FavCoinItem = props => {
 						<Text
 							style={{
 								fontSize: 14,
-								color: props.coin.price.change ? (props.coin.price.change > 0 ? 'darkgreen' : (props.coin.price.change < 0 ? 'red' : 'black')) : 'black',
+								color: props.coin.price?.change ? (props.coin.price?.change > 0 ? 'darkgreen' : (props.coin.price?.change < 0 ? 'red' : 'black')) : 'black',
 								marginLeft: 10
 							}}
 						>

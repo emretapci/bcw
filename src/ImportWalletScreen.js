@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, NativeModules } from 'react-native';
+import { Wallet } from './Blockchain';
+import { View, Text } from 'react-native';
 import { Button } from 'react-native-paper';
 import { TextInput } from './Components';
 import { messages } from './Util';
-import global from './Global';
-
-let WalletCore = NativeModules.WalletCore;
 
 export const ImportWalletScreen = props => {
 	const [walletName, setWalletName] = useState('');
@@ -40,19 +38,18 @@ export const ImportWalletScreen = props => {
 		if (hasError)
 			return;
 
-		WalletCore.importWallet(phrase, () => {
-			setPhraseInError(messages['invalidPhrase']);
-		}, () => {
+		Wallet.import(phrase).then(() => {
 			AsyncStorage.setItem('walletName', walletName);
 			AsyncStorage.setItem('phrase', phrase);
-			global.wallet.name = walletName;
-			props.navigation.reset({
+			Wallet.generateAddresses().then(() => props.navigation.reset({
 				index: 0,
 				routes: [{
 					name: 'WalletMain',
 					params: { showImportedDialog: true }
 				}]
-			});
+			}));
+		}).catch(() => {
+			setPhraseInError(messages['invalidPhrase']);
 		});
 	}
 

@@ -51,4 +51,4 @@ Listening on 0.0.0.0:8545
 
 Wallet: emre2
 
-Mnemonic:		cart raise horro property reduce relief bonus network unaware spring fury calm
+Mnemonic:		cart raise horror property reduce relief bonus network unaware spring fury calm

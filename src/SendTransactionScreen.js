@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View } from 'react-native';
+import { View, Image } from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { styles, CoinItem } from './Components';
-import { Text, TextInput, Button } from 'react-native-paper';
+import { Portal, Dialog, Text, TextInput, Button, Paragraph } from 'react-native-paper';
 import { Coins, Chains, ERC20 } from './Blockchain';
-import global from './Global';
 import ModalSelector from 'react-native-modal-selector-searchable';
 import { useEffect } from 'react';
 
@@ -18,7 +17,7 @@ export const SendTransactionScreen = props => {
 			screenOptions={{
 				headerShown: false
 			}}>
-			<Stack.Screen name='EnterTransactionDetails' component={EnterTransactionDetailsScreen} />
+			<Stack.Screen name='EnterTransactionDetails' component={EnterTransactionDetailsScreen} initialParams={{ walletName: props.route.params.walletName }} />
 			<Stack.Screen name='ScanQRCode' component={ScanQRCodeScreen} />
 		</Stack.Navigator>
 	);
@@ -50,11 +49,48 @@ export const ScanQRCodeScreen = props => {
 	);
 }
 
+const TransactionResultDialog = props => {
+	return (
+		<Dialog visible={true} onDismiss={props.close}>
+			<Image source={props.transactionResult.success ? require('../resources/transactionSuccess.png') : require('../resources/transactionFailure.png')}
+				style={{
+					alignSelf: 'center',
+					width: 150,
+					height: 150,
+					marginTop: 50,
+					marginBottom: 30
+				}} />
+			<Dialog.Content>
+				<Paragraph style={{ alignSelf: 'center' }}>
+					{props.transactionResult.success ? 'Transaction successful.' : 'Transaction failure'}
+				</Paragraph>
+				{!props.transactionResult.success &&
+					<Paragraph style={{ alignSelf: 'center' }}>
+						{props.transactionResult.message}
+					</Paragraph>
+				}
+			</Dialog.Content>
+			<Dialog.Actions>
+				<View style={{ padding: 10, width: '100%' }}>
+					<Button
+						mode='contained'
+						onPress={props.close}
+					>
+						close
+					</Button>
+				</View>
+			</Dialog.Actions>
+		</Dialog >
+	);
+}
+
+
 const EnterTransactionDetailsScreen = props => {
 	const [selectedCoinCode, setSelectedCoinCode] = useState();
 	const [toAddress, setToAddress] = useState(null);
 	const [balance, setBalance] = useState(0);
 	const [amount, setAmount] = useState('');
+	const [transactionResult, setTransactionResult] = useState({ show: false });
 
 	useEffect(() => {
 		setToAddress(props.route.params?.toAddress);
@@ -65,171 +101,188 @@ const EnterTransactionDetailsScreen = props => {
 	}, [selectedCoinCode])
 
 	return (
-		<View style={{
-			...styles.mainContainer,
-			height: null,
-			flexDirection: 'column',
-			paddingTop: 50,
-			paddingLeft: 20
-		}}>
+		<Portal.Host>
+			<Portal>
+				{transactionResult.show && <TransactionResultDialog transactionResult={transactionResult} close={() => {
+					setTransactionResult({ show: false });
+					if (transactionResult.success) {
+						props.navigation.reset({
+							index: 0,
+							routes: [{ name: 'WalletMain' }]
+						})
+					}
+				}} />}
+			</Portal>
 			<View style={{
-				flexDirection: 'row',
-				justifyContent: 'flex-start',
-				alignItems: 'center'
+				...styles.mainContainer,
+				height: null,
+				flexDirection: 'column',
+				paddingTop: 50,
+				paddingLeft: 20
 			}}>
-				<Text style={{
-					fontSize: 18,
-					width: '20%'
+				<View style={{
+					flexDirection: 'row',
+					justifyContent: 'flex-start',
+					alignItems: 'center'
 				}}>
-					from
-				</Text>
-				<TextInput
-					mode='outlined'
-					dense
-					disabled={true}
-					style={{
-						fontSize: 20,
-						paddingLeft: 10,
-						width: '80%'
-					}} >
-					{'wallet "' + global.wallet.name + '"'}
-				</TextInput>
-			</View >
-			<View style={{
-				flexDirection: 'row',
-				justifyContent: 'flex-start',
-				alignItems: 'center'
-			}}>
-				<Text style={{
-					fontSize: 18,
-					width: '20%'
-				}}>
-					balance
-				</Text>
-				<TextInput
-					mode='outlined'
-					dense
-					disabled={true}
-					style={{
-						fontSize: 20,
-						paddingLeft: 10,
-						flexGrow: 1
-					}} >
-					{balance}
-				</TextInput>
-				{selectedCoinCode
-					? <Text style={{
+					<Text style={{
 						fontSize: 18,
-						marginLeft: 10
+						width: '20%'
 					}}>
-						{selectedCoinCode}
+						from
 					</Text>
-					: null}
-			</View >
-			<View style={{
-				flexDirection: 'row',
-				justifyContent: 'flex-start',
-				alignItems: 'center'
-			}}>
-				<Text style={{
-					fontSize: 18,
-					width: '20%'
-				}}>
-					to
-				</Text>
-				<TextInput
-					mode='outlined'
-					dense
-					right={!!toAddress
-						? <TextInput.Icon name='close-circle-outline' onPress={() => {
-							if (props.route.params)
-								props.route.params.toAddress = null;
-							setToAddress(null);
-						}} />
-						: <TextInput.Icon name='qrcode' onPress={() => {
-							props.navigation.navigate('ScanQRCode');
-						}} />}
-					style={{
-						fontSize: 20,
-						paddingLeft: 10,
-						width: '80%'
-					}}
-					value={toAddress}
-					onChangeText={text => setToAddress(text)}
-				>
-				</TextInput>
-			</View >
-			<View style={{
-				flexDirection: 'row',
-				justifyContent: 'flex-start',
-				alignItems: 'center'
-			}}>
-				<Text style={{
-					fontSize: 18,
-					width: '20%'
-				}}>
-					coin
-				</Text>
-				<View style={{ width: '80%' }}>
-					<ModalSelector
+					<TextInput
+						mode='outlined'
+						dense
+						disabled={true}
 						style={{
-							marginLeft: 9,
-							marginTop: 5,
-							height: 43
-						}}
-						data={Object.keys(Coins).map((coinCode, index) => ({
-							key: index,
-							label: coinCode,
-							component: <CoinItem coin={Coins[coinCode]} />
-						}))}
-						initValue={selectedCoinCode || 'Tap to select a coin'}
-						onChange={option => setSelectedCoinCode(option.label)}
-					/>
-				</View>
-			</View>
-			<View style={{
-				flexDirection: 'row',
-				justifyContent: 'flex-start',
-				alignItems: 'center'
-			}}>
-				<Text style={{
-					fontSize: 18,
-					width: '20%'
+							fontSize: 20,
+							paddingLeft: 10,
+							width: '80%'
+						}} >
+						{'wallet "' + props.route.params.walletName + '"'}
+					</TextInput>
+				</View >
+				<View style={{
+					flexDirection: 'row',
+					justifyContent: 'flex-start',
+					alignItems: 'center'
 				}}>
-					amount
-				</Text>
-				<TextInput
-					mode='outlined'
-					dense
-					onChangeText={text => setAmount(text)}
-					style={{
-						fontSize: 20,
-						paddingLeft: 10,
-						flexGrow: 1
-					}} >
-				</TextInput>
-				{selectedCoinCode
-					? <Text style={{
+					<Text style={{
+						fontSize: 18,
+						width: '20%'
+					}}>
+						balance
+					</Text>
+					<TextInput
+						mode='outlined'
+						dense
+						disabled={true}
+						style={{
+							fontSize: 20,
+							paddingLeft: 10,
+							flexGrow: 1
+						}} >
+						{balance}
+					</TextInput>
+					{selectedCoinCode
+						? <Text style={{
+							fontSize: 18,
+							marginLeft: 10
+						}}>
+							{selectedCoinCode}
+						</Text>
+						: null}
+				</View >
+				<View style={{
+					flexDirection: 'row',
+					justifyContent: 'flex-start',
+					alignItems: 'center'
+				}}>
+					<Text style={{
+						fontSize: 18,
+						width: '20%'
+					}}>
+						to
+					</Text>
+					<TextInput
+						mode='outlined'
+						dense
+						right={!!toAddress
+							? <TextInput.Icon name='close-circle-outline' onPress={() => {
+								if (props.route.params)
+									props.route.params.toAddress = null;
+								setToAddress(null);
+							}} />
+							: <TextInput.Icon name='qrcode' onPress={() => {
+								props.navigation.navigate('ScanQRCode');
+							}} />}
+						style={{
+							fontSize: 20,
+							paddingLeft: 10,
+							width: '80%'
+						}}
+						value={toAddress}
+						onChangeText={text => setToAddress(text)}
+					>
+					</TextInput>
+				</View >
+				<View style={{
+					flexDirection: 'row',
+					justifyContent: 'flex-start',
+					alignItems: 'center'
+				}}>
+					<Text style={{
+						fontSize: 18,
+						width: '20%'
+					}}>
+						coin
+					</Text>
+					<View style={{ width: '80%' }}>
+						<ModalSelector
+							style={{
+								marginLeft: 9,
+								marginTop: 5,
+								height: 43
+							}}
+							data={Object.keys(Coins).map((coinCode, index) => ({
+								key: index,
+								label: coinCode,
+								component: <CoinItem coin={Coins[coinCode]} />
+							}))}
+							initValue={selectedCoinCode || 'Tap to select a coin'}
+							onChange={option => setSelectedCoinCode(option.label)}
+						/>
+					</View>
+				</View>
+				{selectedCoinCode && <View style={{
+					flexDirection: 'row',
+					justifyContent: 'flex-start',
+					alignItems: 'center'
+				}}>
+					<Text style={{
+						fontSize: 18,
+						width: '20%'
+					}}>
+						amount
+					</Text>
+					<TextInput
+						mode='outlined'
+						dense
+						onChangeText={text => setAmount(text)}
+						style={{
+							fontSize: 20,
+							paddingLeft: 10,
+							flexGrow: 1
+						}} >
+					</TextInput>
+					<Text style={{
 						fontSize: 18,
 						marginLeft: 10
 					}}>
 						{selectedCoinCode}
 					</Text>
-					: null}
+				</View >
+				}
+				<Button
+					mode='contained'
+					style={{
+						marginTop: 40
+					}}
+					onPress={() => sendTransaction(toAddress, selectedCoinCode, amount).then(res => {
+						if (res.error)
+							setTransactionResult({ show: true, success: false, message: res.error.message });
+						else if (res.result)
+							setTransactionResult({ show: true, success: true });
+					})}
+				>
+					send
+				</Button>
 			</View >
-			<Button
-				mode='contained'
-				style={{
-					marginTop: 40
-				}}
-				onPress={() => sendTransaction(toAddress, selectedCoinCode, amount)}
-			>
-				send
-			</Button>
-		</View >
+		</Portal.Host>
 	);
 }
 
-const sendTransaction = (toAddress, coinCode, tokenAmount) => {
-	ERC20.transfer(Coins[coinCode].address, toAddress, tokenAmount).then(res => console.log(res));
+const sendTransaction = async (toAddress, coinCode, tokenAmount) => {
+	return await ERC20.transfer(Coins[coinCode].address, toAddress, tokenAmount);
 }

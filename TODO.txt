@@ -1,14 +1,3 @@
 Disable landscape orientation for iOS.
 
 Remove android:usesCleartextTraffic="true" from AndroidManifest.xml
-
-Handle send transaction response
-
-Set Ethereum URL to public ganache URL
-	Ganache running on Windows on local machine at 7545:
-		Gets token balance of EMT as > 0
-	ganache-cli running on docker container on local machine at 8545:
-		Cannot install truffle, so could not test
-	ganache-cli running on docker container on contabo server at 8545:
-		[SyntaxError: JSON Parse error: Unable to parse JSON string]
-		TypeError: null is not an object (evaluating 'res.result')
