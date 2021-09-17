@@ -1,48 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Wallet } from './Blockchain';
-import { View, Image, NativeModules } from 'react-native';
+import React from 'react';
+import { View, Image } from 'react-native';
 import { Button } from 'react-native-paper';
-import { Logo } from './Components';
 
 export const CreateOrImportWalletScreen = props => {
-	const [showLogo, setShowLogo] = useState(true);
-
-	const logoScreenInterval = 1000;
-
-	useEffect(() => {
-		AsyncStorage.multiGet(['walletName', 'phrase']).then(values => {
-			const walletNameElement = values.find(val => val[0] == 'walletName');
-			const walletName = walletNameElement && walletNameElement[1];
-			const phraseElement = values.find(val => val[0] == 'phrase');
-			const phrase = phraseElement && phraseElement[1];
-			if (walletName && phrase && walletName.trim() != '' && phrase.trim().split(/\s+/).length == 12) {
-				NativeModules.WalletCore.importWallet(phrase,
-					() => AsyncStorage.multiRemove(['walletName', 'phrase']).then(() => setTimeout(() => setShowLogo(false), logoScreenInterval)),
-					() => Wallet.generateAddresses().then(() => {
-						setTimeout(() => {
-							props.navigation.reset({
-								index: 0,
-								routes: [{
-									name: 'WalletMain',
-									params: {
-										showImportedDialog: false
-									}
-								}]
-							});
-						}, logoScreenInterval)
-					})
-				);
-			}
-			else {
-				AsyncStorage.multiRemove(['walletName', 'phrase']).then(() => setTimeout(() => setShowLogo(false), logoScreenInterval));
-			}
-		});
-	}, []);
-
-	return (showLogo
-		? <Logo />
-		: <View>
+	return (
+		<View>
 			<View style={{
 				width: '100%',
 				height: '70%',

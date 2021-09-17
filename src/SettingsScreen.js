@@ -1,21 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { useTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, ScrollView } from 'react-native';
-import { Avatar, List, Text, Switch } from 'react-native-paper';
+import { View, Image, ScrollView } from 'react-native';
+import { Portal, Dialog, Avatar, List, Text, Switch, Paragraph, Button } from 'react-native-paper';
 import { Coins } from './Blockchain';
+import { styles } from './Components';
+import merge from 'deepmerge';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DarkModeContext } from './Context';
 
 const Stack = createNativeStackNavigator();
 
-export const SettingsScreen = props => {
+export const SettingsScreen = () => {
+	const { colors } = useTheme();
+	console.log(colors);
+
 	return (
 		<Stack.Navigator
 			initialRouteName='SettingsMain'
 			screenOptions={{
-				headerShown: false
+				//headerShown: false
+				headerStyle: { backgroundColor: 'cornflowerblue' }
 			}}>
-			<Stack.Screen name='SettingsMain' component={SettingsMainScreen} />
-			<Stack.Screen name='SelectCoins' component={SelectCoinsScreen} />
+			<Stack.Screen name='SettingsMain' component={SettingsMainScreen} options={{ title: 'Settings' }} />
+			<Stack.Screen name='SelectCoins' component={SelectCoinsScreen} options={{ title: 'Select favorite coins' }} />
+			<Stack.Screen name='Wallet' component={WalletScreen} options={{ title: 'Wallet' }} />
+			<Stack.Screen name='Preferences' component={PreferencesScreen} options={{ title: 'Preferences' }} />
 		</Stack.Navigator>
 	);
 }
@@ -25,72 +35,211 @@ const SettingsMainScreen = props => {
 		<>
 			<List.Section>
 				<List.Item
-					title='Select coins'
-					left={() => <List.Icon icon='tune' />}
+					title='Wallet'
+					style={{ height: 60, paddingTop: 0 }}
+					left={() => <List.Icon icon={require('../resources/wallet.png')} />}
+					right={() => <List.Icon icon={'chevron-right'} />}
+					onPress={() => props.navigation.navigate('Wallet')}
+				>
+					<Text>asfsafasfdas</Text>
+				</List.Item>
+				<List.Item
+					title='Select favorite coins'
+					style={{ height: 60, paddingTop: 0 }}
+					left={() => <List.Icon icon={require('../resources/selectFromList.png')} />}
+					right={() => <List.Icon icon={'chevron-right'} />}
 					onPress={() => props.navigation.navigate('SelectCoins')}
+				/>
+				<List.Item
+					title='Preferences'
+					style={{ height: 60, paddingTop: 0 }}
+					left={() => <List.Icon icon={require('../resources/preferences.png')} />}
+					right={() => <List.Icon icon={'chevron-right'} />}
+					onPress={() => props.navigation.navigate('Preferences')}
 				/>
 			</List.Section>
 		</>
 	);
 }
 
-const SelectCoinsScreen = props => {
-	const [favoriteCoins, setFavoriteCoins] = useState([]);
+const WalletScreen = props => {
+	const [showDeleteWalletConfirmationDialog, setShowDeleteWalletConfirmationDialog] = useState(false);
+	const [showDeleteWalletAcknowledgeDialog, setShowDeleteWalletAcknowledgeDialog] = useState(false);
 
-	useEffect(() => AsyncStorage.getItem('favoriteCoins').then(favoriteCoins => setFavoriteCoins(JSON.parse(favoriteCoins || '[]'))), []);
+	const DeleteWalletConfirmationDialog = () => {
+		const onYes = () => {
+			AsyncStorage.removeItem('walletName');
+			AsyncStorage.removeItem('phrase');
+			setShowDeleteWalletAcknowledgeDialog(true);
+			setShowDeleteWalletConfirmationDialog(false);
+		}
+
+		const onCancel = () => {
+			setShowDeleteWalletConfirmationDialog(false);
+		}
+
+		return (
+			<Dialog visible={true} onDismiss={onCancel}>
+				<Image source={require('../resources/deleteWallet.png')} style={styles.dialogImage} />
+				<Dialog.Content>
+					<Paragraph style={styles.dialogContent}>Are you sure that you want to delete your wallet?</Paragraph>
+				</Dialog.Content>
+				<Dialog.Actions>
+					<View style={{ padding: 10, width: '100%' }}>
+						<Button
+							style={{
+								backgroundColor: '#FF8888'
+							}}
+							mode='outlined'
+							onPress={onYes}
+						>
+							yes, delete!
+						</Button>
+						<Button
+							style={{
+								marginTop: 10
+							}}
+							mode='contained'
+							onPress={onCancel}
+						>
+							cancel
+						</Button>
+					</View>
+				</Dialog.Actions>
+			</Dialog>
+		);
+	}
+
+	const DeleteWalletAcknowledgeDialog = () => {
+		const onPress = () => {
+			setShowDeleteWalletAcknowledgeDialog(false);
+			props.navigation.reset({
+				index: 0,
+				routes: [{ name: 'CreateOrImportWallet' }]
+			});
+		}
+
+		return (
+			<Dialog visible={true} onDismiss={onPress}>
+				<Image source={require('../resources/success.png')} style={styles.dialogImage} />
+				<Dialog.Content>
+					<Paragraph style={styles.dialogContent}>Your wallet is deleted.</Paragraph>
+				</Dialog.Content>
+				<Dialog.Actions>
+					<View style={{ padding: 10, width: '100%' }}>
+						<Button
+							mode='contained'
+							onPress={onPress}
+						>
+							ok
+						</Button>
+					</View>
+				</Dialog.Actions>
+			</Dialog>
+		);
+	}
+
+	return (
+		<Portal.Host>
+			<Portal>
+				{showDeleteWalletConfirmationDialog && <DeleteWalletConfirmationDialog />}
+				{showDeleteWalletAcknowledgeDialog && <DeleteWalletAcknowledgeDialog />}
+			</Portal>
+			<ScrollView>
+				<List.Section>
+					<List.Item
+						title='Delete wallet'
+						style={{ height: 60, paddingTop: 0 }}
+						left={() => <List.Icon icon={require('../resources/deleteWallet.png')} />}
+						onPress={() => setShowDeleteWalletConfirmationDialog(true)}
+					/>
+				</List.Section>
+			</ScrollView >
+		</Portal.Host>
+	);
+}
+
+const PreferencesScreen = () => {
+	const { darkMode, setDarkMode } = useContext(DarkModeContext);
+
+	useEffect(() => AsyncStorage.setItem('darkMode', JSON.stringify(darkMode)), [darkMode]);
 
 	return (
 		<ScrollView>
 			<List.Section>
-				{
-					Object.keys(Coins).map(coinCode => {
-						const isEnabled = favoriteCoins.indexOf(coinCode) >= 0;
-						return <View
-							key={coinCode}
-							style={{
-								flexDirection: 'row',
-								justifyContent: 'space-between'
-							}}
-						>
-							<View
-								style={{
-									marginBottom: 5,
-									marginLeft: 5,
-									flexDirection: 'row'
-								}}
-							>
-								<Avatar.Image size={50} source={Coins[coinCode].logo} style={{ marginRight: 10 }} />
-								<View
-									style={{
-										marginBottom: 5,
-										flexDirection: 'column'
-									}}>
-									<Text style={{ fontSize: 20 }}>{coinCode}</Text>
-									<Text style={{ fontSize: 14 }}>{Coins[coinCode].name}</Text>
-								</View>
-							</View>
-							<View>
-								<Switch
-									trackColor={{ false: "#767577", true: "#81b0ff" }}
-									thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-									ios_backgroundColor="#3e3e3e"
-									onValueChange={() => setFavoriteCoins(prev => {
-										let ret;
-										if (prev.indexOf(coinCode) >= 0)
-											ret = prev.filter(c => c != coinCode)
-										else
-											ret = [...prev, coinCode];
-										AsyncStorage.setItem('favoriteCoins', JSON.stringify(ret));
-										return ret;
-									})}
-									value={isEnabled}
-								/>
-							</View>
-						</View>
-					})
-				}
+				<List.Item
+					title='Dark mode'
+					style={{ height: 60, paddingTop: 0 }}
+					left={() => <List.Icon icon={require('../resources/darkMode.png')} />}
+					right={() => <Switch value={darkMode} onValueChange={() => setDarkMode(!darkMode)} />}
+				/>
+				<List.Item
+					title='Currency'
+					style={styles.listItem}
+					left={() => <List.Icon icon={require('../resources/currency.png')} />}
+					right={() => <List.Icon icon={'chevron-right'} />}
+				/>
 			</List.Section>
 		</ScrollView >
 	);
 }
 
+const SelectCoinsScreen = () => {
+	const [coins, setCoins] = useState({});
+	const coinsRef = useRef();
+
+	useEffect(() => coinsRef.coins = coins, [coins]);
+
+	useEffect(() => {
+		const coins = Object.keys(Coins).reduce((all, code) => merge(all, { [code]: { code, favorite: false } }), {});
+		AsyncStorage.getItem('favoriteCoins').then(favoriteCoins => {
+			JSON.parse(favoriteCoins || '[]').forEach(favCoinCode => coins[favCoinCode].favorite = true);
+			setCoins(coins);
+		});
+
+		return () => AsyncStorage.setItem('favoriteCoins', JSON.stringify(Object.keys(coinsRef.coins).filter(coinCode => coinsRef.coins[coinCode].favorite)));
+	}, []);
+
+	const enabledChanged = (coinCode, value) => setCoins(prev => merge(prev, { [coinCode]: { favorite: value } }));
+
+	return (
+		<ScrollView>
+			{Object.keys(coins).map(coinCode => <SelectableCoinItem key={coinCode} enabled={coins[coinCode].favorite} coin={Coins[coinCode]} enabledChanged={enabledChanged} />)}
+		</ScrollView >
+	);
+}
+
+const SelectableCoinItem = props => {
+	return <View key={props.coin.code} style={{
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		height: 65
+	}}>
+		<View
+			style={{
+				marginBottom: 5,
+				marginLeft: 5,
+				flexDirection: 'row'
+			}}
+		>
+			<Avatar.Image size={50} source={props.coin.logo} style={{ marginRight: 10 }} />
+			<View
+				style={{
+					marginBottom: 5,
+					flexDirection: 'column'
+				}}>
+				<Text style={{ fontSize: 20 }}>{props.coin.code}</Text>
+				<Text style={{ fontSize: 14 }}>{props.coin.name}</Text>
+			</View>
+		</View>
+		<View>
+			<Switch
+				trackColor={{ false: "#767577", true: "#81b0ff" }}
+				thumbColor={props.enabled ? "#f5dd4b" : "#f4f3f4"}
+				ios_backgroundColor="#3e3e3e"
+				value={props.enabled}
+				onValueChange={value => props.enabledChanged(props.coin.code, value)}
+			/>
+		</View>
+	</View>
+}
