@@ -1,3 +1,36 @@
 Disable landscape orientation for iOS.
 
 Remove android:usesCleartextTraffic="true" from AndroidManifest.xml
+
+Suggest words when entering Mnemonic
+
+Disable android word suggestion when entering mnemonic
+
+Select chain for for receive address
+
+Redesign select coins list screen similar to trust wallet
+
+Implement dark mode
+
+Settings > Push notifications for received assets
+
+Settings > Preferences > Currency
+
+Settings > About > Version, Terms of service, Support
+
+Settings > Wallet > View account public keys (XPUB)
+
+Settings > Wallet > View recovery phrase
+
+Coin prices API is for development, change it with some production API possibly provided by Bitay
+
+Switch from Ganache to Ethereum mainnet
+
+Display header for screens
+
+Info from bitay:
+	coin prices: OK
+	fiat exchange rates: OK
+	ethereum json rpc: infura project id and secret will be provided by bitay
+	bsc json rpc: bitay will supply
+	btc json rpc: bitay will supply

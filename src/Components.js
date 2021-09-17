@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { TextInput as MUITextInput, Avatar } from 'react-native-paper';
 
 export const Logo = props => {
@@ -179,31 +179,119 @@ export const styles = StyleSheet.create({
 	image: {
 		alignSelf: 'center',
 		marginTop: '10%'
+	},
+	dialogImage: {
+		alignSelf: 'center',
+		width: 150,
+		height: 150,
+		marginTop: 50,
+		marginBottom: 30
+	},
+	dialogContent: {
+		textAlign: 'center',
+		alignSelf: 'center'
+	},
+	listItem: {
+		height: 60,
+		paddingTop: 0
+	},
+	mainSummary: {
+		alignSelf: 'center',
+		alignItems: 'center',
+		justifyContent: 'flex-start',
+		flexDirection: 'column',
+		backgroundColor: 'cornflowerblue',
+		width: '100%',
+		height: '28%'
+	},
+	coinItem: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		width: '100%',
+		height: 50,
+		backgroundColor: 'white'
 	}
 });
 
-export const CoinItem = props =>
-	<View
-		style={{
-			marginBottom: 0,
-			marginLeft: 4,
-			marginTop: 4,
-			flexDirection: 'row',
-			alignItems: 'center'
-		}}
-	>
-		<Avatar.Image
-			size={props.iconSize}
-			source={props.coin.logo}
-		/>
-		<View
-			style={{
-				marginLeft: 10,
-				marginBottom: 5,
-				flexDirection: 'row',
-				alignItems: 'center'
-			}}>
-			<Text style={{ fontSize: 20 }}>{props.coin.code}</Text>
-			<Text style={{ marginLeft: 10, fontSize: 14 }}>{props.coin.name}</Text>
+export const CoinList = props => {
+	return (
+		<ScrollView
+			contentContainerStyle={{
+				alignItems: 'center',
+				justifyContext: 'flex-start'
+			}}
+		>
+			{props.coins.map(coin => <CoinItem key={coin.code} coin={coin} displayPrice={props.displayPrice} />)}
+		</ScrollView>
+	);
+}
+
+export const CoinItem = props => {
+	return (
+		<View style={styles.coinItem}>
+			<View style={{ flexDirection: 'row', marginLeft: 10 }}>
+				<Avatar.Image size={38} source={props.coin.logo} />
+				<View
+					style={{
+						justifyContent: 'flex-start',
+						flexDirection: 'column',
+						height: '100%',
+						marginLeft: 10
+					}}>
+					<Text
+						style={{
+							fontSize: props.displayPrice ? 14 : 18,
+							color: 'black'
+						}}
+					>
+						{props.coin.name}
+					</Text>
+					<View
+						style={{
+							flexDirection: 'row',
+							justifyContent: 'flex-start'
+						}}>
+						{props.displayPrice && <>
+							<Text
+								style={{
+									fontSize: 14,
+									color: 'gray'
+								}}
+							>
+								{'$' + (props.coin.price.value || 0).toFixed(2)}
+							</Text>
+							<Text
+								style={{
+									fontSize: 14,
+									color: props.coin.price?.change ? (props.coin.price?.change > 0 ? 'darkgreen' : (props.coin.price?.change < 0 ? 'red' : 'black')) : 'black',
+									marginLeft: 10
+								}}
+							>
+								{(props.coin.price.change || 0).toFixed(2) + '%'}
+							</Text>
+						</>}
+					</View>
+				</View>
+			</View>
+			<View
+				style={{
+					marginRight: 10,
+					height: '100%',
+					flexDirection: 'row',
+					justifyContent: 'flex-start',
+					alignItems: 'center'
+				}}
+			>
+				<Text
+					style={{
+						fontSize: 18,
+						color: 'black'
+					}}
+				>
+					{(props.coin.balance || 0).toFixed(3) + ' ' + props.coin.code}
+				</Text>
+			</View>
 		</View>
-	</View>
+	);
+}
