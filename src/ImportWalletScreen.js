@@ -76,6 +76,8 @@ export const ImportWalletScreen = props => {
 						onChangeText={text => setPhrase(text)}
 						multiline
 						numberOfLines={5}
+						autoCompleteType={'off'}
+						autoCorrect={false}
 					/>
 					<Text
 						style={{

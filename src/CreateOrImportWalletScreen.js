@@ -39,7 +39,7 @@ export const CreateOrImportWalletScreen = props => {
 					<Button
 						disabled={props.disabled}
 						mode={'outlined'}
-						onPress={() => props.navigation.navigate('CreateWallet')}
+						onPress={() => props.navigation.navigate('CreateWallet.Main')}
 						style={{
 							width: '100%',
 							marginTop: 10

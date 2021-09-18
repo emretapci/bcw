@@ -4,10 +4,6 @@ Remove android:usesCleartextTraffic="true" from AndroidManifest.xml
 
 Suggest words when entering Mnemonic
 
-Disable android word suggestion when entering mnemonic
-
-Select chain for for receive address
-
 Redesign select coins list screen similar to trust wallet
 
 Implement dark mode
