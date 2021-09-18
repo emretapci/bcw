@@ -40,9 +40,7 @@ export const WalletMainScreen = props => {
 	const [walletName, setWalletName] = useState('');
 	const [favoriteCoinCodes, setFavoriteCoinCodes] = useState([]);
 	const [coins, setCoins] = useState({});
-	const [showReceiveQrCodeDialog, setShowReceiveQrCodeDialog] = useState(false);
 	const [showWalletImportedDialog, setShowWalletImportedDialog] = useState(props.route.params?.showImportedDialog);
-	const [snackbarVisible, setSnackbarVisible] = useState(false);
 
 	useEffect(() => setCoins(Object.keys(Coins).reduce((all, code) => merge(all, { [code]: { code, price: { value: 0, change: 0 } } }), {})), []);
 
@@ -79,13 +77,6 @@ export const WalletMainScreen = props => {
 				{showWalletImportedDialog &&
 					<WalletImportedDialog
 						close={() => setShowWalletImportedDialog(false)}
-					/>
-				}
-				{showReceiveQrCodeDialog &&
-					<ReceiveQrCodeDialog
-						setSnackbarVisible={setSnackbarVisible}
-						close={() => setShowReceiveQrCodeDialog(false)}
-						address={Chains['Ethereum'].address}
 					/>
 				}
 			</Portal>
@@ -140,7 +131,7 @@ export const WalletMainScreen = props => {
 					{
 						text: 'receive',
 						icon: 'download-multiple',
-						onPress: () => setShowReceiveQrCodeDialog(true)
+						onPress: () => props.navigation.navigate('ReceiveTransaction')
 					}].map(button =>
 						<View
 							key={button.text}
@@ -168,13 +159,6 @@ export const WalletMainScreen = props => {
 				</View>
 			</View>
 			<CoinList coins={favoriteCoinCodes.map(code => merge(coins[code], { name: Coins[code].name, logo: Coins[code].logo }))} displayPrice />
-			<Snackbar
-				visible={snackbarVisible}
-				onDismiss={() => setSnackbarVisible(false)}
-				duration={1000}
-			>
-				Address copied.
-			</Snackbar>
 		</Portal.Host>
 	);
 }

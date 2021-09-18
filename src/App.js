@@ -32,7 +32,7 @@ const App = () => {
 					<Stack.Screen name='WalletMain' component={WalletMainScreen} />
 					<Stack.Screen name='Settings' component={SettingsScreen} options={{ title: 'Settings' }} />
 					<Stack.Screen name='SendTransaction' component={SendTransactionScreen} options={{ title: 'Send transaction' }} />
-					<Stack.Screen name='ReceiveTransaction' component={ReceiveTransactionScreen} options={{ title: 'Select coin to receive' }} />
+					<Stack.Screen name='ReceiveTransaction' component={ReceiveTransactionScreen} options={{ title: 'Select chain to receive' }} />
 				</Stack.Navigator>
 			</NavigationContainer>
 		</DarkModeContext.Provider>

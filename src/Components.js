@@ -181,29 +181,3 @@ export const styles = StyleSheet.create({
 		marginTop: '10%'
 	}
 });
-
-export const CoinItem = props =>
-	<View
-		style={{
-			marginBottom: 0,
-			marginLeft: 4,
-			marginTop: 4,
-			flexDirection: 'row',
-			alignItems: 'center'
-		}}
-	>
-		<Avatar.Image
-			size={props.iconSize}
-			source={props.coin.logo}
-		/>
-		<View
-			style={{
-				marginLeft: 10,
-				marginBottom: 5,
-				flexDirection: 'row',
-				alignItems: 'center'
-			}}>
-			<Text style={{ fontSize: 20 }}>{props.coin.code}</Text>
-			<Text style={{ marginLeft: 10, fontSize: 14 }}>{props.coin.name}</Text>
-		</View>
-	</View>

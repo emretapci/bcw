@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, Image } from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
-import { styles, CoinItem } from './Components';
+import { styles } from './Components';
 import { Portal, Dialog, Text, TextInput, Button, Paragraph } from 'react-native-paper';
 import { Coins, Chains, ERC20 } from './Blockchain';
 import ModalSelector from 'react-native-modal-selector-searchable';
@@ -84,6 +84,31 @@ const TransactionResultDialog = props => {
 	);
 }
 
+const CoinItem = props =>
+	<View
+		style={{
+			marginBottom: 0,
+			marginLeft: 4,
+			marginTop: 4,
+			flexDirection: 'row',
+			alignItems: 'center'
+		}}
+	>
+		<Avatar.Image
+			size={props.iconSize}
+			source={props.coin.logo}
+		/>
+		<View
+			style={{
+				marginLeft: 10,
+				marginBottom: 5,
+				flexDirection: 'row',
+				alignItems: 'center'
+			}}>
+			<Text style={{ fontSize: 20 }}>{props.coin.code}</Text>
+			<Text style={{ marginLeft: 10, fontSize: 14 }}>{props.coin.name}</Text>
+		</View>
+	</View>
 
 const EnterTransactionDetailsScreen = props => {
 	const [selectedCoinCode, setSelectedCoinCode] = useState();
