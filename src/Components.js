@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { TextInput as MUITextInput, Avatar } from 'react-native-paper';
 
 export const Logo = props => {
@@ -179,5 +179,37 @@ export const styles = StyleSheet.create({
 	image: {
 		alignSelf: 'center',
 		marginTop: '10%'
+	},
+	dialogImage: {
+		alignSelf: 'center',
+		width: 150,
+		height: 150,
+		marginTop: 50,
+		marginBottom: 30
+	},
+	dialogContent: {
+		textAlign: 'center',
+		alignSelf: 'center'
+	},
+	listItem: {
+		height: 60,
+		paddingTop: 0
+	},
+	mainSummary: {
+		alignSelf: 'center',
+		alignItems: 'center',
+		justifyContent: 'flex-start',
+		flexDirection: 'column',
+		backgroundColor: 'cornflowerblue',
+		width: '100%',
+		height: '28%'
+	},
+	coinItem: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		width: '100%',
+		height: 50,
+		backgroundColor: 'white'
 	}
 });

@@ -52,7 +52,7 @@ export const ScanQRCodeScreen = props => {
 const TransactionResultDialog = props => {
 	return (
 		<Dialog visible={true} onDismiss={props.close}>
-			<Image source={props.transactionResult.success ? require('../resources/transactionSuccess.png') : require('../resources/transactionFailure.png')}
+			<Image source={props.transactionResult.success ? require('../resources/success.png') : require('../resources/failure.png')}
 				style={{
 					alignSelf: 'center',
 					width: 150,

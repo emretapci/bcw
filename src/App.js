@@ -6,10 +6,12 @@ import { CreateOrImportWalletScreen } from './CreateOrImportWalletScreen';
 import { CreateWalletScreen } from './CreateWalletScreen';
 import { ImportWalletScreen } from './ImportWalletScreen';
 import { WalletMainScreen } from './WalletMainScreen';
-import { SettingsScreen } from './SettingsScreen';
+import { SettingsScreen } from './SettingsScreens';
 import { SendTransactionScreen } from './SendTransactionScreen';
 import { ReceiveTransactionScreen } from './ReceiveTransactionScreen';
 import { DarkModeContext } from './Context';
+import { Settings } from './SettingsScreens';
+import { CreateWallet } from './CreateWalletScreens';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,16 +25,23 @@ const App = () => {
 				<Stack.Navigator
 					initialRouteName={'Welcome'}
 					screenOptions={{
-						headerShown: false
+						headerStyle: { backgroundColor: 'cornflowerblue' }
 					}}>
-					<Stack.Screen name='Welcome' component={WelcomeScreen} />
+					<Stack.Screen name='Welcome' component={WelcomeScreen} options={{ headerShown: false }} />
 					<Stack.Screen name='CreateOrImportWallet' component={CreateOrImportWalletScreen} />
-					<Stack.Screen name='CreateWallet' component={CreateWalletScreen} options={{ title: 'Create wallet' }} />
+					<Stack.Screen name='CreateWallet.Main' component={CreateWallet.Main} />
+					<Stack.Screen name='CreateWallet.Screen1' component={CreateWallet.Screen1} />
+					<Stack.Screen name='CreateWallet.Screen2' component={CreateWallet.Screen2} />
+					<Stack.Screen name='CreateWallet.Screen3' component={CreateWallet.Screen3} />
+					<Stack.Screen name='CreateWallet.Screen4' component={CreateWallet.Screen4} />
 					<Stack.Screen name='ImportWallet' component={ImportWalletScreen} options={{ title: 'Import wallet' }} />
-					<Stack.Screen name='WalletMain' component={WalletMainScreen} />
-					<Stack.Screen name='Settings' component={SettingsScreen} options={{ title: 'Settings' }} />
+					<Stack.Screen name='WalletMain' component={WalletMainScreen} options={{ headerShown: false }} />
 					<Stack.Screen name='SendTransaction' component={SendTransactionScreen} options={{ title: 'Send transaction' }} />
 					<Stack.Screen name='ReceiveTransaction' component={ReceiveTransactionScreen} options={{ title: 'Select chain to receive' }} />
+					<Stack.Screen name='Settings.Main' component={Settings.Main} options={{ title: 'Settings' }} />
+					<Stack.Screen name='Settings.SelectCoins' component={Settings.SelectCoinsScreen} options={{ title: 'Select favorite coins' }} />
+					<Stack.Screen name='Settings.Wallet' component={Settings.WalletScreen} options={{ title: 'Wallet' }} />
+					<Stack.Screen name='Settings.Preferences' component={Settings.PreferencesScreen} options={{ title: 'Preferences' }} />
 				</Stack.Navigator>
 			</NavigationContainer>
 		</DarkModeContext.Provider>
