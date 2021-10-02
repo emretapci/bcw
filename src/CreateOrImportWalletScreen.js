@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Image } from 'react-native';
 import { Button } from 'react-native-paper';
 
+import { NativeModules } from 'react-native';
+
 export const CreateOrImportWalletScreen = props => {
+	useEffect(() => {
+		NativeModules.RNTrustWallet.createWallet((str, str2) => console.log(str2));
+	}, []);
+
 	return (
 		<View>
 			<View style={{
