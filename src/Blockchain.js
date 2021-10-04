@@ -519,12 +519,14 @@ export const Coins = {
 }
 
 export const Wallet = {
+	create: () => new Promise(resolve => WalletCore.createWallet((_, phrase) => resolve(phrase))),
+
 	import: phrase => new Promise((resolve, reject) => WalletCore.importWallet(phrase, reject, resolve)),
 
 	generateAddresses: async () => {
 		await Promise.all(Object.keys(Chains).map(chainName => {
 			return new Promise(resolve => {
-				NativeModules.WalletCore.getAddressForCoin(Chains[chainName].walletCoreCode,
+				WalletCore.getAddressForCoin(Chains[chainName].walletCoreCode,
 					address => {
 						Chains[chainName].address = address;
 						resolve();
