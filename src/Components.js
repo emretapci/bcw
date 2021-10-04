@@ -59,7 +59,8 @@ export const Chip = props => {
 			backgroundColor: 'lightgray',
 			margin: 5,
 			alignItems: 'flex-start',
-			flexDirection: 'row'
+			flexDirection: 'row',
+			overflow: 'hidden'
 		}}
 	>
 		{props.displayIndex && <Text

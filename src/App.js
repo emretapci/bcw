@@ -29,11 +29,11 @@ const App = () => {
 					}}>
 					<Stack.Screen name='Welcome' component={WelcomeScreen} options={{ headerShown: false }} />
 					<Stack.Screen name='CreateOrImportWallet' component={CreateOrImportWalletScreen} />
-					<Stack.Screen name='CreateWallet.Main' component={CreateWallet.Main} />
-					<Stack.Screen name='CreateWallet.Screen1' component={CreateWallet.Screen1} />
-					<Stack.Screen name='CreateWallet.Screen2' component={CreateWallet.Screen2} />
-					<Stack.Screen name='CreateWallet.Screen3' component={CreateWallet.Screen3} />
-					<Stack.Screen name='CreateWallet.Screen4' component={CreateWallet.Screen4} />
+					<Stack.Screen name='CreateWallet.Main' component={CreateWallet.Main} options={{ title: 'Create wallet' }} />
+					<Stack.Screen name='CreateWallet.Screen1' component={CreateWallet.Screen1} options={{ title: 'Recovery phrase' }} />
+					<Stack.Screen name='CreateWallet.Screen2' component={CreateWallet.Screen2} options={{ title: 'QR code' }} />
+					<Stack.Screen name='CreateWallet.Screen3' component={CreateWallet.Screen3} options={{ title: 'Verify' }} />
+					<Stack.Screen name='CreateWallet.Screen4' component={CreateWallet.Screen4} options={{ title: 'Create wallet' }} />
 					<Stack.Screen name='ImportWallet' component={ImportWalletScreen} options={{ title: 'Import wallet' }} />
 					<Stack.Screen name='WalletMain' component={WalletMainScreen} options={{ headerShown: false }} />
 					<Stack.Screen name='SendTransaction' component={SendTransactionScreen} options={{ title: 'Send transaction' }} />
