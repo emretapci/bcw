@@ -61,4 +61,5 @@ buck-out/
 /android/*.log
 /android/build
 /android/app/build
+/android/app/bin
 */*.hprof
