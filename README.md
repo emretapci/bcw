@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Bitay Crypto Wallet React Native application
 
 ## Android install
@@ -13,7 +12,3 @@ The install file `app-release.apk` will be in `android/app/build/outputs/apk/` d
 ## iOS install
 
 TBD soon...
-=======
-# wallet_main
-
->>>>>>> 08eb32ad5ace958361b62cba5de00a1bfbf182c6
