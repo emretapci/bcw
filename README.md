@@ -11,6 +11,8 @@ The install file `app-release.apk` will be in `android/app/build/outputs/apk/` d
 
 ## iOS install
 
+1. Install `Ruby Version Manager` and use ruby version `3.0.2`.
+
 1. In `ios` folder, run `pod install`.
 
 1. Edit `ios/Podfile` as:
