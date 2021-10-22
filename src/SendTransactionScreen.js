@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, Image } from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { styles } from './Components';
-import { Portal, Dialog, Text, TextInput, Button, Paragraph } from 'react-native-paper';
+import { Portal, Dialog, Text, TextInput, Button, Paragraph, Avatar } from 'react-native-paper';
 import { Coins, Chains, ERC20 } from './Blockchain';
 import ModalSelector from 'react-native-modal-selector-searchable';
 import { useEffect } from 'react';

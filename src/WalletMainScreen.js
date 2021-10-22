@@ -85,7 +85,7 @@ export const WalletMainScreen = props => {
 				<View
 					style={{
 						width: '100%',
-						height: '10%',
+						height: 60,
 						flexDirection: 'row',
 						justifyContent: 'space-between'
 					}}
@@ -96,7 +96,7 @@ export const WalletMainScreen = props => {
 				<View
 					style={{
 						width: '100%',
-						height: '50%',
+						height: 100,
 						flexDirection: 'column',
 						alignItems: 'center'
 					}}>
@@ -118,10 +118,10 @@ export const WalletMainScreen = props => {
 				</View>
 				<View
 					style={{
-						width: '70%',
-						height: '40%',
+						width: '50%',
+						height: 80,
 						flexDirection: 'row',
-						justifyContent: 'space-around'
+						justifyContent: 'space-between'
 					}}>
 					{[{
 						text: 'send',

@@ -35,7 +35,7 @@ const App = () => {
 					<Stack.Screen name='CreateWallet.Screen3' component={CreateWallet.Screen3} options={{ title: 'Verify' }} />
 					<Stack.Screen name='CreateWallet.Screen4' component={CreateWallet.Screen4} options={{ title: 'Create wallet' }} />
 					<Stack.Screen name='ImportWallet' component={ImportWalletScreen} options={{ title: 'Import wallet' }} />
-					<Stack.Screen name='WalletMain' component={WalletMainScreen} options={{ headerShown: false }} />
+					<Stack.Screen name='WalletMain' component={WalletMainScreen} options={{ title: 'Wallet' }} />
 					<Stack.Screen name='SendTransaction' component={SendTransactionScreen} options={{ title: 'Send transaction' }} />
 					<Stack.Screen name='ReceiveTransaction' component={ReceiveTransactionScreen} options={{ title: 'Select chain to receive' }} />
 					<Stack.Screen name='Settings.Main' component={Settings.Main} options={{ title: 'Settings' }} />

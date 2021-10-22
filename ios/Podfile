@@ -12,6 +12,11 @@ target 'bcw' do
     :hermes_enabled => false
   )
 
+  pod 'RNPermissions', :path => '../node_modules/react-native-permissions'
+
+  permissions_path = '../node_modules/react-native-permissions/ios'
+  pod 'Permission-Camera', :path => "#{permissions_path}/Camera.podspec"
+
   pod 'TrustWalletCore'
 
   target 'bcwTests' do

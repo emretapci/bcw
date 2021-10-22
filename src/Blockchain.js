@@ -527,7 +527,8 @@ export const Wallet = {
 		await Promise.all(Object.keys(Chains).map(chainName => {
 			return new Promise(resolve => {
 				WalletCore.getAddressForCoin(Chains[chainName].walletCoreCode,
-					address => {
+					(_, address) => {
+						console.log(address);
 						Chains[chainName].address = address;
 						resolve();
 					}
@@ -589,7 +590,7 @@ export const Prices = {
 				[code]: {
 					price: {
 						value: data[code].quote.USD.price,
-						change: data[code].quote.USD.percent_change_1h
+						change: data[code].quote.USD.percent_change_24h
 					}
 				}
 			}), {});

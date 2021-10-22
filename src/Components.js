@@ -203,7 +203,7 @@ export const styles = StyleSheet.create({
 		flexDirection: 'column',
 		backgroundColor: 'cornflowerblue',
 		width: '100%',
-		height: '28%'
+		height: 250
 	},
 	coinItem: {
 		flexDirection: 'row',

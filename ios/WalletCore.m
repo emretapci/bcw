@@ -5,5 +5,11 @@
 
 RCT_EXTERN_METHOD(createWallet:(RCTResponseSenderBlock)successCallback)
 RCT_EXTERN_METHOD(importWallet:(NSString *)phrase errorCallback:(RCTResponseSenderBlock)errorCallback successCallback:(RCTResponseSenderBlock)successCallback)
+RCT_EXTERN_METHOD(getAddressForCoin:(int)coinCode successCallback:(RCTResponseSenderBlock)successCallback)
+
++ (BOOL)requiresMainQueueSetup
+{
+  return NO;
+}
 
 @end
