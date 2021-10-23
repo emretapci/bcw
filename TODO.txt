@@ -18,7 +18,7 @@ Settings > Wallet > View account public keys (XPUB)
 
 Settings > Wallet > View recovery phrase
 
-Switch from Ganache to testnet
+Switch from Ganache to testnet: OK
 
 Info from bitay:
 	coin prices: OK

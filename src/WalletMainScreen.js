@@ -50,7 +50,7 @@ export const WalletMainScreen = props => {
 		const ethAddress = Chains['Ethereum'].address;
 
 		//Fetch ETH assets
-		Ethereum.getEthAssets().then(balance => setCoins(prev => merge(prev, { ETH: { balance } })));
+		Ethereum.getAssets().then(balance => setCoins(prev => merge(prev, { ETH: { balance } })));
 
 		//Fetch ERC20 token assets
 		const erc20Codes = Object.keys(Coins).filter(code => Coins[code].chain == 'Ethereum' && !Coins[code].isNative);

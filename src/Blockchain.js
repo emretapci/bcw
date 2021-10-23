@@ -9,6 +9,7 @@ export const Chains = {
 		name: 'Ethereum',
 		walletCoreCode: 60,
 		nodeUrl: 'https://ropsten.infura.io/v3/8c443646c5734ab1a311785600b659c0',
+		chainId: "03", //ropsten
 		logo: require('../resources/coins/ETH.png')
 	},
 	BSC: {
@@ -538,13 +539,33 @@ export const Wallet = {
 }
 
 export const Ethereum = {
-	getEthAssets: async () => {
+	getAssets: async () => {
 		const balance = await makeJsonRpcCall({
 			url: Chains['Ethereum'].nodeUrl,
 			methodName: 'eth_getBalance',
 			params: [Chains['Ethereum'].address, 'latest']
 		});
 		return balance ? balance.result / 1000000000000000000 : null;
+	},
+
+	transfer: async (to, ethAmount) => {
+		const signedTransaction = await Ethereum._createTransaction({
+			to,
+			chainId: Chains['Ethereum'].chainId,
+			gasPrice: await Ethereum._getGasPrice(),
+			gasLimit: await Ethereum._getGasEstimate(),
+			nonce: await Ethereum._getLatestTransactionCount(),
+			weiAmount: Math.floor(ethAmount * 1000000000000000000)
+		});
+
+		const sendTransactionResponse = await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
+			methodName: 'eth_sendRawTransaction',
+			params: [signedTransaction]
+		});
+
+		console.log(sendTransactionResponse);
+		return sendTransactionResponse;
 	},
 
 	_getLatestTransactionCount: async () => {
@@ -571,7 +592,9 @@ export const Ethereum = {
 			params: [{ from: Chains['Ethereum'].address }]
 		});
 		return parseInt(gasEstimate.result, 16);
-	}
+	},
+
+	_createTransaction: tx => new Promise(resolve => NativeModules.WalletCore.createEthTransaction(JSON.stringify(tx), data => resolve(data)))
 }
 
 export const Prices = {
@@ -604,7 +627,8 @@ export const Prices = {
 export const ERC20 = {
 	transfer: async (contractTo, tokenTo, tokenAmount) => {
 		const signedTransaction = await ERC20._createTransaction({
-			contractTo,
+			chainId:
+				contractTo,
 			gasPrice: await Ethereum._getGasPrice(),
 			gasLimit: await Ethereum._getGasEstimate(),
 			nonce: await Ethereum._getLatestTransactionCount(),
@@ -652,13 +676,13 @@ export const ERC20 = {
 			const balance = parseInt(res.result, 16);
 			return Number.isNaN(balance) ? 0 : balance;
 		}
-		catch(err) {
+		catch (err) {
 			console.log(err);
 			return 0;
 		}
 	},
 
-	_createTransaction: tx => new Promise(resolve => NativeModules.WalletCore.createERC20Transaction(JSON.stringify(tx), data => resolve(data))),
+	_createTransaction: tx => new Promise(resolve => NativeModules.WalletCore.createERC20Transaction(JSON.stringify(tx), data => resolve(data)))
 }
 
 const makeJsonRpcCall = async ({ url, methodName, params }) => {

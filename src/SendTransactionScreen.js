@@ -4,7 +4,7 @@ import { View, Image } from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { styles } from './Components';
 import { Portal, Dialog, Text, TextInput, Button, Paragraph, Avatar } from 'react-native-paper';
-import { Coins, Chains, ERC20 } from './Blockchain';
+import { Coins, Chains, Ethereum, ERC20 } from './Blockchain';
 import ModalSelector from 'react-native-modal-selector-searchable';
 import { useEffect } from 'react';
 
@@ -308,6 +308,9 @@ const EnterTransactionDetailsScreen = props => {
 	);
 }
 
-const sendTransaction = async (toAddress, coinCode, tokenAmount) => {
-	return await ERC20.transfer(Coins[coinCode].address, toAddress, tokenAmount);
+const sendTransaction = async (toAddress, coinCode, amount) => {
+	if (coinCode == 'ETH')
+		return await Ethereum.transfer(toAddress, amount);
+	else if (Coins[coinCode].chain == 'Ethereum')
+		return await ERC20.transfer(Coins[coinCode].address, toAddress, amount);
 }

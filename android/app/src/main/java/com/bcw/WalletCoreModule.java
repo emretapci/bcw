@@ -56,13 +56,37 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void createEthTransaction(String params, Callback successCallback) throws Exception {
+        JSONObject paramsJson = new JSONObject(params);
+
+        PrivateKey privateKey = wallet.getKeyForCoin(CoinType.ETHEREUM);
+
+        Ethereum.SigningInput signingInput = Ethereum.SigningInput.newBuilder()
+                .setChainId(ByteString.copyFrom(new BigInteger(paramsJson.getString("chainId")).toByteArray()))
+                .setToAddress(paramsJson.getString("to"))
+                .setGasPrice(ByteString.copyFrom((new BigInteger(paramsJson.getString("gasPrice"), 16)).toByteArray()))
+                .setGasLimit(ByteString.copyFrom((new BigInteger(paramsJson.getString("gasLimit"), 16)).toByteArray()))
+                .setNonce(ByteString.copyFrom(new BigInteger(paramsJson.getString("nonce"), 10).toByteArray()))
+                .setTransaction(Ethereum.Transaction.newBuilder()
+                        .setTransfer(Ethereum.Transaction.Transfer.newBuilder()
+                                .setAmount(ByteString.copyFrom(new BigInteger(paramsJson.getString("weiAmount"), 10).toByteArray()))
+                                .build())
+                        .build())
+                .setPrivateKey(ByteString.copyFrom(privateKey.data()))
+                .build();
+
+        Ethereum.SigningOutput signerOutput = AnySigner.sign(signingInput, CoinType.ETHEREUM, Ethereum.SigningOutput.parser());
+        successCallback.invoke(toHexString(signerOutput.getEncoded().toByteArray(), true));
+    }
+
+    @ReactMethod
     public void createERC20Transaction(String params, Callback successCallback) throws Exception {
         JSONObject paramsJson = new JSONObject(params);
 
         PrivateKey privateKey = wallet.getKeyForCoin(CoinType.ETHEREUM);
 
         Ethereum.SigningInput signingInput = Ethereum.SigningInput.newBuilder()
-                .setChainId(ByteString.copyFrom(new BigInteger("01").toByteArray()))
+                .setChainId(ByteString.copyFrom(new BigInteger(paramsJson.getString("chainId")).toByteArray()))
                 .setToAddress(paramsJson.getString("contractTo"))
                 .setGasPrice(ByteString.copyFrom((new BigInteger(paramsJson.getString("gasPrice"), 16)).toByteArray()))
                 .setGasLimit(ByteString.copyFrom((new BigInteger(paramsJson.getString("gasLimit"), 16)).toByteArray()))
