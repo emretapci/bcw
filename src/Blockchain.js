@@ -8,8 +8,7 @@ export const Chains = {
 	Ethereum: {
 		name: 'Ethereum',
 		walletCoreCode: 60,
-		nodeUrl: 'http://173.249.57.83:81/n4dAfCs1SG2p9JnaZ36BBfdbh3/',
-		//nodeUrl: 'http://192.168.1.20:8545'
+		nodeUrl: 'https://ropsten.infura.io/v3/8c443646c5734ab1a311785600b659c0',
 		logo: require('../resources/coins/ETH.png')
 	},
 	BSC: {
@@ -539,6 +538,15 @@ export const Wallet = {
 }
 
 export const Ethereum = {
+	getEthAssets: async () => {
+		const balance = await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
+			methodName: 'eth_getBalance',
+			params: [Chains['Ethereum'].address, 'latest']
+		});
+		return balance ? balance.result / 1000000000000000000 : null;
+	},
+
 	_getLatestTransactionCount: async () => {
 		const res = await makeJsonRpcCall({
 			url: Chains['Ethereum'].nodeUrl,
@@ -546,15 +554,6 @@ export const Ethereum = {
 			params: [Chains['Ethereum'].address, 'latest']
 		});
 		return parseInt(res.result, 16);
-	},
-
-	_getEthAssets: async () => {
-		const balance = await makeJsonRpcCall({
-			url: Chains['Ethereum'].nodeUrl,
-			methodName: 'eth_getBalance',
-			params: [Chains['Ethereum'].address, 'latest']
-		});
-		return balance ? balance.result / 1000000000000000000 : null;
 	},
 
 	_getGasPrice: async () => {

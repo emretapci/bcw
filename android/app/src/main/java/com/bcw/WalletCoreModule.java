@@ -36,7 +36,7 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void createWallet(Callback successCallback) {
         wallet = new HDWallet(128, "");
-        successCallback.invoke(wallet.mnemonic());
+        successCallback.invoke(null, wallet.mnemonic());
     }
 
     @ReactMethod
@@ -52,7 +52,7 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getAddressForCoin(Integer coinCode, Callback successCallback) {
         String address = wallet.getAddressForCoin(CoinType.createFromValue(coinCode));
-        successCallback.invoke(address);
+        successCallback.invoke(null, address);
     }
 
     @ReactMethod
