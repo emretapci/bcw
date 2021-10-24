@@ -24,37 +24,66 @@ class WalletCore: NSObject {
     successCallback([NSNull(), address])
   }
 
-/*  @objc func createERC20Transaction(String params, Callback successCallback) throws Exception {
-    JSONObject paramsJson = new JSONObject(params)
-    let privateKey = wallet.getKeyForCoin(CoinType.ETHEREUM)
-
-    Ethereum.SigningInput signingInput = Ethereum.SigningInput.newBuilder()
-      .setChainId(ByteString.copyFrom(new BigInteger("01").toByteArray()))
-        .setToAddress(paramsJson.getString("contractTo"))
-        .setGasPrice(ByteString.copyFrom((new BigInteger(paramsJson.getString("gasPrice"), 16)).toByteArray()))
-        .setGasLimit(ByteString.copyFrom((new BigInteger(paramsJson.getString("gasLimit"), 16)).toByteArray()))
-        .setNonce(ByteString.copyFrom(new BigInteger(paramsJson.getString("nonce"), 10).toByteArray()))
-        .setTransaction(Ethereum.Transaction.newBuilder()
-        .setErc20Transfer(Ethereum.Transaction.ERC20Transfer.newBuilder()
-        .setTo(paramsJson.getString("tokenTo"))
-        .setAmount(ByteString.copyFrom(new BigInteger(paramsJson.getString("tokenAmount"), 10).toByteArray()))
-        .build())
-        .build())
-        .setPrivateKey(ByteString.copyFrom(privateKey.data()))
-        .build();
-
-    Ethereum.SigningOutput signerOutput = AnySigner.sign(signingInput, CoinType.ETHEREUM, Ethereum.SigningOutput.parser());
-    successCallback.invoke(toHexString(signerOutput.getEncoded().toByteArray(), true));
+  struct ERC20TransactionParams: Decodable {
+    var chainId: String
+    var contractTo: String
+    var gasPrice: String
+    var gasLimit: String
+    var nonce: String
+    var tokenTo: String
+    var tokenAmount: String
   }
+  
+  struct EthTransactionParams: Decodable {
+    var chainId: String
+    var to: String
+    var gasPrice: String
+    var gasLimit: String
+    var nonce: String
+    var weiAmount: String
+  }
+  
+  @objc func createEthTransaction(_ params: String, successCallback: RCTResponseSenderBlock) -> Void {    
+    let jsonParams: EthTransactionParams = try! JSONDecoder().decode(EthTransactionParams.self, from: params.data(using: .utf8)!)
 
-  @objc func String toHexString(byte[] byteArray, boolean withPrefix) {
-    StringBuilder stringBuilder = new StringBuilder();
-    if (withPrefix) {
-      stringBuilder.append("0x");
+    let signingInput = EthereumSigningInput.with {
+      $0.chainID = Data(hexString: jsonParams.chainId)!
+      $0.toAddress = jsonParams.to
+      $0.gasPrice = Data(hexString: jsonParams.gasPrice)!
+      $0.gasLimit = Data(hexString: jsonParams.gasLimit)!
+      $0.nonce = Data(hexString: jsonParams.nonce)!
+      $0.transaction = EthereumTransaction.with {
+        $0.transfer = EthereumTransaction.Transfer.with {
+          $0.amount = Data(hexString: jsonParams.weiAmount)!
+        }
+      }
+      $0.privateKey = wallet.getKeyForCoin(coin: .ethereum).data
     }
-    for (int i = 0; i < byteArray.length; i++) {
-      stringBuilder.append(String.format("%02x", byteArray[i]));
+
+    let output: EthereumSigningOutput = AnySigner.sign(input: signingInput, coin: .ethereum)
+    successCallback([NSNull(), output.encoded.hexString])
+  }
+  
+  @objc func createERC20Transaction(_ params: String, successCallback: RCTResponseSenderBlock) -> Void {
+    let decoder = JSONDecoder()
+    let jsonParams = try! decoder.decode(ERC20TransactionParams.self, from: Data(params.utf8))
+
+    let signingInput = EthereumSigningInput.with {
+      $0.chainID = Data(hexString: jsonParams.chainId)!
+      $0.toAddress = jsonParams.contractTo
+      $0.gasPrice = Data(hexString: jsonParams.gasPrice)!
+      $0.gasLimit = Data(hexString: jsonParams.gasPrice)!
+      $0.nonce = Data(hexString: jsonParams.nonce)!
+      $0.transaction = EthereumTransaction.with {
+        $0.erc20Transfer = EthereumTransaction.ERC20Transfer.with {
+          $0.amount = Data(hexString: jsonParams.tokenAmount)!
+          $0.to = jsonParams.tokenTo
+        }
+      }
+      $0.privateKey = wallet.getKeyForCoin(coin: .ethereum).data
     }
-    return stringBuilder.toString();
-  }*/
+    
+    let output: EthereumSigningOutput = AnySigner.sign(input: signingInput, coin: .ethereum)
+    successCallback([NSNull(), output.encoded.hexString])
+  }
 }

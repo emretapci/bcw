@@ -549,22 +549,27 @@ export const Ethereum = {
 	},
 
 	transfer: async (to, ethAmount) => {
+		let weiAmount = Math.floor(ethAmount * 1000000000000000000).toString(16);
+		weiAmount = weiAmount.padStart(Math.ceil(weiAmount.length / 2) * 2, 0);
+
+		let nonce = (await Ethereum._getLatestTransactionCount())?.toString(16) || "00";
+		nonce = nonce.padStart(Math.ceil(nonce.length / 2) * 2, 0);
+
 		const signedTransaction = await Ethereum._createTransaction({
 			to,
 			chainId: Chains['Ethereum'].chainId,
-			gasPrice: await Ethereum._getGasPrice(),
-			gasLimit: await Ethereum._getGasEstimate(),
-			nonce: await Ethereum._getLatestTransactionCount(),
-			weiAmount: Math.floor(ethAmount * 1000000000000000000)
+			gasPrice: (await Ethereum._getGasPrice()).toString(16),
+			gasLimit: (await Ethereum._getGasEstimate()).toString(16),
+			nonce,
+			weiAmount
 		});
 
 		const sendTransactionResponse = await makeJsonRpcCall({
 			url: Chains['Ethereum'].nodeUrl,
 			methodName: 'eth_sendRawTransaction',
-			params: [signedTransaction]
+			params: ['0x' + signedTransaction]
 		});
 
-		console.log(sendTransactionResponse);
 		return sendTransactionResponse;
 	},
 
@@ -594,7 +599,7 @@ export const Ethereum = {
 		return parseInt(gasEstimate.result, 16);
 	},
 
-	_createTransaction: tx => new Promise(resolve => NativeModules.WalletCore.createEthTransaction(JSON.stringify(tx), data => resolve(data)))
+	_createTransaction: tx => new Promise(resolve => NativeModules.WalletCore.createEthTransaction(JSON.stringify(tx), (_, data) => resolve(data)))
 }
 
 export const Prices = {
