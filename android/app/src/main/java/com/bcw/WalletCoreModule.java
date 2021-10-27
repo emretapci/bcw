@@ -76,7 +76,7 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
                 .build();
 
         Ethereum.SigningOutput signerOutput = AnySigner.sign(signingInput, CoinType.ETHEREUM, Ethereum.SigningOutput.parser());
-        successCallback.invoke(toHexString(signerOutput.getEncoded().toByteArray(), true));
+        successCallback.invoke(null, toHexString(signerOutput.getEncoded().toByteArray()));
     }
 
     @ReactMethod
@@ -101,14 +101,11 @@ public class WalletCoreModule extends ReactContextBaseJavaModule {
                 .build();
 
         Ethereum.SigningOutput signerOutput = AnySigner.sign(signingInput, CoinType.ETHEREUM, Ethereum.SigningOutput.parser());
-        successCallback.invoke(toHexString(signerOutput.getEncoded().toByteArray(), true));
+        successCallback.invoke(null, toHexString(signerOutput.getEncoded().toByteArray()));
     }
 
-    private String toHexString(byte[] byteArray, boolean withPrefix) {
+    private String toHexString(byte[] byteArray) {
         StringBuilder stringBuilder = new StringBuilder();
-        if (withPrefix) {
-            stringBuilder.append("0x");
-        }
         for (int i = 0; i < byteArray.length; i++) {
             stringBuilder.append(String.format("%02x", byteArray[i]));
         }
