@@ -8,8 +8,8 @@ export const Chains = {
 	Ethereum: {
 		name: 'Ethereum',
 		walletCoreCode: 60,
-		nodeUrl: 'http://173.249.57.83:81/n4dAfCs1SG2p9JnaZ36BBfdbh3/',
-		//nodeUrl: 'http://192.168.1.20:8545'
+		nodeUrl: 'https://ropsten.infura.io/v3/8c443646c5734ab1a311785600b659c0',
+		chainId: "03", //ropsten
 		logo: require('../resources/coins/ETH.png')
 	},
 	BSC: {
@@ -539,6 +539,40 @@ export const Wallet = {
 }
 
 export const Ethereum = {
+	getAssets: async () => {
+		const balance = await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
+			methodName: 'eth_getBalance',
+			params: [Chains['Ethereum'].address, 'latest']
+		});
+		return balance ? balance.result / 1000000000000000000 : null;
+	},
+
+	transfer: async (to, ethAmount) => {
+		let weiAmount = Math.floor(ethAmount * 1000000000000000000).toString(16);
+		weiAmount = weiAmount.padStart(Math.ceil(weiAmount.length / 2) * 2, 0);
+
+		let nonce = (await Ethereum._getLatestTransactionCount())?.toString(16) || "00";
+		nonce = nonce.padStart(Math.ceil(nonce.length / 2) * 2, 0);
+
+		const signedTransaction = await Ethereum._createTransaction({
+			to,
+			chainId: Chains['Ethereum'].chainId,
+			gasPrice: (await Ethereum._getGasPrice()).toString(16),
+			gasLimit: (await Ethereum._getGasEstimate()).toString(16),
+			nonce,
+			weiAmount
+		});
+
+		const sendTransactionResponse = await makeJsonRpcCall({
+			url: Chains['Ethereum'].nodeUrl,
+			methodName: 'eth_sendRawTransaction',
+			params: ['0x' + signedTransaction]
+		});
+
+		return sendTransactionResponse;
+	},
+
 	_getLatestTransactionCount: async () => {
 		const res = await makeJsonRpcCall({
 			url: Chains['Ethereum'].nodeUrl,
@@ -546,15 +580,6 @@ export const Ethereum = {
 			params: [Chains['Ethereum'].address, 'latest']
 		});
 		return parseInt(res.result, 16);
-	},
-
-	_getEthAssets: async () => {
-		const balance = await makeJsonRpcCall({
-			url: Chains['Ethereum'].nodeUrl,
-			methodName: 'eth_getBalance',
-			params: [Chains['Ethereum'].address, 'latest']
-		});
-		return balance ? balance.result / 1000000000000000000 : null;
 	},
 
 	_getGasPrice: async () => {
@@ -572,7 +597,9 @@ export const Ethereum = {
 			params: [{ from: Chains['Ethereum'].address }]
 		});
 		return parseInt(gasEstimate.result, 16);
-	}
+	},
+
+	_createTransaction: tx => new Promise(resolve => NativeModules.WalletCore.createEthTransaction(JSON.stringify(tx), (_, data) => resolve(data)))
 }
 
 export const Prices = {
@@ -605,7 +632,8 @@ export const Prices = {
 export const ERC20 = {
 	transfer: async (contractTo, tokenTo, tokenAmount) => {
 		const signedTransaction = await ERC20._createTransaction({
-			contractTo,
+			chainId:
+				contractTo,
 			gasPrice: await Ethereum._getGasPrice(),
 			gasLimit: await Ethereum._getGasEstimate(),
 			nonce: await Ethereum._getLatestTransactionCount(),
@@ -653,13 +681,13 @@ export const ERC20 = {
 			const balance = parseInt(res.result, 16);
 			return Number.isNaN(balance) ? 0 : balance;
 		}
-		catch(err) {
+		catch (err) {
 			console.log(err);
 			return 0;
 		}
 	},
 
-	_createTransaction: tx => new Promise(resolve => NativeModules.WalletCore.createERC20Transaction(JSON.stringify(tx), data => resolve(data))),
+	_createTransaction: tx => new Promise(resolve => NativeModules.WalletCore.createERC20Transaction(JSON.stringify(tx), data => resolve(data)))
 }
 
 const makeJsonRpcCall = async ({ url, methodName, params }) => {
