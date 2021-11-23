@@ -6,36 +6,56 @@ let WalletCore = NativeModules.WalletCore;
 
 export const Chains = {
 	Ethereum: {
+		name: 'Ethereum',
 		walletCoreCode: 60,
-		nodeUrl: 'http://173.249.57.83:81/n4dAfCs1SG2p9JnaZ36BBfdbh3/'
+		nodeUrl: 'http://173.249.57.83:81/n4dAfCs1SG2p9JnaZ36BBfdbh3/',
 		//nodeUrl: 'http://192.168.1.20:8545'
+		logo: require('../resources/coins/ETH.png')
 	},
 	BSC: {
-		walletCoreCode: 714
+		name: 'BSC',
+		walletCoreCode: 714,
+		logo: require('../resources/coins/BNB.png')
 	},
 	Algorand: {
-		walletCoreCode: 283
+		name: 'Algorand',
+		walletCoreCode: 283,
+		logo: require('../resources/coins/ALGO.png'),
 	},
 	Bitcoin: {
-		walletCoreCode: 0
+		name: 'Bitcoin',
+		walletCoreCode: 0,
+		logo: require('../resources/coins/BTC.png'),
 	},
 	Dash: {
-		walletCoreCode: 5
+		name: 'Dash',
+		walletCoreCode: 5,
+		logo: require('../resources/coins/DASH.png'),
 	},
 	BC: {
-		walletCoreCode: 714
+		name: 'BC',
+		walletCoreCode: 714,
+		logo: require('../resources/coins/BNB.png')
 	},
 	Solana: {
-		walletCoreCode: 501
+		name: 'Solana',
+		walletCoreCode: 501,
+		logo: require('../resources/coins/SOL.png'),
 	},
 	VeChain: {
-		walletCoreCode: 818
+		name: 'VeChain',
+		walletCoreCode: 818,
+		logo: require('../resources/coins/VET.png'),
 	},
 	Waves: {
-		walletCoreCode: 5741564
+		name: 'Waves',
+		walletCoreCode: 5741564,
+		logo: require('../resources/coins/WAVES.png'),
 	},
 	Stellar: {
-		walletCoreCode: 148
+		name: 'Stellar',
+		walletCoreCode: 148,
+		logo: require('../resources/coins/XLM.png'),
 	}
 }
 

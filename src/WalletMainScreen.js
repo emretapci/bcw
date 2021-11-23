@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Portal, Dialog, Paragraph, Button, IconButton, Avatar, Snackbar } from 'react-native-paper';
-import { View, Image, Text } from 'react-native';
+import { Portal, Dialog, Paragraph, Button, IconButton, Avatar } from 'react-native-paper';
+import { View, Image, Text, ScrollView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Coins, Chains, Prices, ERC20 } from './Blockchain';
-import Clipboard from '@react-native-clipboard/clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNQRGenerator from 'rn-qr-generator';
 import merge from 'deepmerge';
-import { CoinList, styles } from './Components';
+import { styles } from './Components';
 
 const WalletImportedDialog = props => {
 	return (
@@ -37,95 +35,12 @@ const WalletImportedDialog = props => {
 	);
 }
 
-const ReceiveQrCodeDialog = props => {
-	const [imageUri, setImageUri] = useState();
-
-	useEffect(() => RNQRGenerator.generate({
-		value: props.address,
-		height: 200,
-		width: 200
-	}).then(response => {
-		const { uri } = response;
-		setImageUri(uri);
-	}), []);
-
-	const copyAddress = () => {
-		Clipboard.setString(props.address);
-		props.setSnackbarVisible(true);
-	}
-
-	return (
-		<Dialog visible={true} onDismiss={props.close}>
-			<Dialog.Content
-				style={{
-					flexDirection: 'column',
-					justifyContent: 'center',
-					alignItems: 'center'
-				}}
-			>
-				<Paragraph style={{
-					marginTop: '5%',
-					fontSize: 20,
-					textAlign: 'center'
-				}}>
-					Scan address
-				</Paragraph>
-				<Paragraph style={{
-					fontSize: 20,
-					textAlign: 'center'
-				}}>
-					to receive payment
-				</Paragraph>
-				<Image
-					source={{
-						uri: imageUri,
-						width: 200,
-						height: 200
-					}}
-					style={{
-						marginTop: 15
-					}}
-				/>
-				<Paragraph style={{
-					marginTop: '5%',
-					textAlign: 'center'
-				}}>
-					{props.address}
-				</Paragraph>
-			</Dialog.Content>
-			<Dialog.Actions>
-				<View style={{ padding: 10, width: '100%' }}>
-					<Button
-						icon='content-copy'
-						size={35}
-						style={{
-							backgroundColor: '#77a1ee',
-							marginBottom: 10
-						}}
-						onPress={copyAddress}
-					>
-						copy
-					</Button>
-					<Button
-						mode='contained'
-						onPress={props.close}
-					>
-						done
-					</Button>
-				</View>
-			</Dialog.Actions>
-		</Dialog>
-	);
-}
-
 export const WalletMainScreen = props => {
 	const [totalAssetsUSD, setTotalAssetsUSD] = useState(0);
 	const [walletName, setWalletName] = useState('');
 	const [favoriteCoinCodes, setFavoriteCoinCodes] = useState([]);
 	const [coins, setCoins] = useState({});
-	const [showReceiveQrCodeDialog, setShowReceiveQrCodeDialog] = useState(false);
 	const [showWalletImportedDialog, setShowWalletImportedDialog] = useState(props.route.params?.showImportedDialog);
-	const [snackbarVisible, setSnackbarVisible] = useState(false);
 
 	useEffect(() => setCoins(Object.keys(Coins).reduce((all, code) => merge(all, { [code]: { code, price: { value: 0, change: 0 } } }), {})), []);
 
@@ -164,13 +79,6 @@ export const WalletMainScreen = props => {
 						close={() => setShowWalletImportedDialog(false)}
 					/>
 				}
-				{showReceiveQrCodeDialog &&
-					<ReceiveQrCodeDialog
-						setSnackbarVisible={setSnackbarVisible}
-						close={() => setShowReceiveQrCodeDialog(false)}
-						address={Chains['Ethereum'].address}
-					/>
-				}
 			</Portal>
 			<View
 				style={styles.mainSummary}>
@@ -183,7 +91,7 @@ export const WalletMainScreen = props => {
 					}}
 				>
 					<IconButton icon='refresh' size={35} color='blue' style={{ backgroundColor: null }} onPress={fetchValues} />
-					<IconButton icon='cog' size={35} color='blue' style={{ backgroundColor: null }} onPress={() => props.navigation.navigate('Settings')} />
+					<IconButton icon='cog' size={35} color='blue' style={{ backgroundColor: null }} onPress={() => props.navigation.navigate('Settings.Main')} />
 				</View>
 				<View
 					style={{
@@ -223,7 +131,7 @@ export const WalletMainScreen = props => {
 					{
 						text: 'receive',
 						icon: 'download-multiple',
-						onPress: () => setShowReceiveQrCodeDialog(true)
+						onPress: () => props.navigation.navigate('ReceiveTransaction')
 					}].map(button =>
 						<View
 							key={button.text}
@@ -250,14 +158,84 @@ export const WalletMainScreen = props => {
 					)}
 				</View>
 			</View>
-			<CoinList coins={favoriteCoinCodes.map(code => merge(coins[code], { name: Coins[code].name, logo: Coins[code].logo }))} displayPrice />
-			<Snackbar
-				visible={snackbarVisible}
-				onDismiss={() => setSnackbarVisible(false)}
-				duration={1000}
+			<ScrollView
+				contentContainerStyle={{
+					alignItems: 'center',
+					justifyContext: 'flex-start'
+				}}
 			>
-				Address copied.
-			</Snackbar>
+				{favoriteCoinCodes.map(code => merge(coins[code], { name: Coins[code].name, logo: Coins[code].logo })).map(coin =>
+					<FavoriteCoinItem key={coin.code} coin={coin} displayPrice={true} />)}
+			</ScrollView>
 		</Portal.Host>
+	);
+}
+
+const FavoriteCoinItem = props => {
+	return (
+		<View style={styles.coinItem}>
+			<View style={{ flexDirection: 'row', marginLeft: 10 }}>
+				<Avatar.Image size={38} source={props.coin.logo} />
+				<View
+					style={{
+						justifyContent: 'flex-start',
+						flexDirection: 'column',
+						height: '100%',
+						marginLeft: 10
+					}}>
+					<Text
+						style={{
+							fontSize: props.displayPrice ? 14 : 18,
+							color: 'black'
+						}}
+					>
+						{props.coin.name}
+					</Text>
+					<View
+						style={{
+							flexDirection: 'row',
+							justifyContent: 'flex-start'
+						}}>
+						{props.displayPrice && <>
+							<Text
+								style={{
+									fontSize: 14,
+									color: 'gray'
+								}}
+							>
+								{'$' + (props.coin.price.value || 0).toFixed(2)}
+							</Text>
+							<Text
+								style={{
+									fontSize: 14,
+									color: props.coin.price?.change ? (props.coin.price?.change > 0 ? 'darkgreen' : (props.coin.price?.change < 0 ? 'red' : 'black')) : 'black',
+									marginLeft: 10
+								}}
+							>
+								{(props.coin.price.change || 0).toFixed(2) + '%'}
+							</Text>
+						</>}
+					</View>
+				</View>
+			</View>
+			<View
+				style={{
+					marginRight: 10,
+					height: '100%',
+					flexDirection: 'row',
+					justifyContent: 'flex-start',
+					alignItems: 'center'
+				}}
+			>
+				<Text
+					style={{
+						fontSize: 18,
+						color: 'black'
+					}}
+				>
+					{(props.coin.balance || 0).toFixed(3) + ' ' + props.coin.code}
+				</Text>
+			</View>
+		</View>
 	);
 }
