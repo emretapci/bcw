@@ -4,10 +4,6 @@ Remove android:usesCleartextTraffic="true" from AndroidManifest.xml
 
 Suggest words when entering Mnemonic
 
-Disable android word suggestion when entering mnemonic
-
-Select chain for for receive address
-
 Redesign select coins list screen similar to trust wallet
 
 Implement dark mode
@@ -22,11 +18,7 @@ Settings > Wallet > View account public keys (XPUB)
 
 Settings > Wallet > View recovery phrase
 
-Coin prices API is for development, change it with some production API possibly provided by Bitay
-
-Switch from Ganache to Ethereum mainnet
-
-Display header for screens
+Switch from Ganache to testnet: OK
 
 Info from bitay:
 	coin prices: OK
@@ -34,3 +26,9 @@ Info from bitay:
 	ethereum json rpc: infura project id and secret will be provided by bitay
 	bsc json rpc: bitay will supply
 	btc json rpc: bitay will supply
+
+Update prices periodically, every 60 secs
+
+Check cybavo API for resolving tokens from contract addresses when adding a custom token
+
+[Tentative] Read supported tokens/coins from a backend API at every startup of the application instead of hard-coded token/coin list

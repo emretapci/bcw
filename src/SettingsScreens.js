@@ -18,9 +18,7 @@ export const Settings = {
 						left={() => <List.Icon icon={require('../resources/wallet.png')} />}
 						right={() => <List.Icon icon={'chevron-right'} />}
 						onPress={() => props.navigation.navigate('Settings.Wallet')}
-					>
-						<Text>asfsafasfdas</Text>
-					</List.Item>
+					/>
 					<List.Item
 						title='Select favorite coins'
 						style={{ height: 60, paddingTop: 0 }}

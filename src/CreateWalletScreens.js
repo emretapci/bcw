@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Wallet } from './Blockchain';
-import { View, Image, Text, Switch, NativeModules } from 'react-native';
+import { View, Image, Text, Switch } from 'react-native';
 import { Snackbar, Button } from 'react-native-paper';
 import { Phrase, Warning, TextInput, styles } from './Components';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -15,9 +15,7 @@ export const CreateWallet = {
 
 		const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
-		useEffect(() => {
-			NativeModules.WalletCore.createWallet(phrase => setPhrase(phrase.trim().split(/\s+/)));
-		}, []);
+		useEffect(() => Wallet.create().then(phrase => setPhrase(phrase.trim().split(/\s+/))), []);
 
 		return (
 			<View style={styles.mainContainer}>

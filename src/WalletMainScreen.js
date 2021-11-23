@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Portal, Dialog, Paragraph, Button, IconButton, Avatar } from 'react-native-paper';
 import { View, Image, Text, ScrollView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Coins, Chains, Prices, ERC20 } from './Blockchain';
+import { Coins, Chains, Prices, ERC20, Ethereum } from './Blockchain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import merge from 'deepmerge';
 import { styles } from './Components';
@@ -47,15 +47,23 @@ export const WalletMainScreen = props => {
 	const fetchValues = () => {
 		Prices.getPrices().then(prices => setCoins(prev => merge(prev, prices)));
 
-		//Fetch ERC20 token assets
 		const ethAddress = Chains['Ethereum'].address;
+
+		//Fetch ETH assets
+		Ethereum.getAssets().then(balance => setCoins(prev => merge(prev, { ETH: { balance } })));
+
+		//Fetch ERC20 token assets
 		const erc20Codes = Object.keys(Coins).filter(code => Coins[code].chain == 'Ethereum' && !Coins[code].isNative);
-		Promise.all(erc20Codes.map(code => ERC20.balanceOf(Coins[code].address, ethAddress))).then(balances => {
-			setCoins(prev => {
-				let newCoins = {};
-				for (let i = 0; i < erc20Codes.length; i++)
-					newCoins[erc20Codes[i]] = { balance: balances[i] };
-				return merge(prev, newCoins);
+		erc20Codes.forEach((code, index) => {
+			setTimeout(() => {
+				ERC20.balanceOf(Coins[code].address, ethAddress).then(balances => {
+					setCoins(prev => {
+						let newCoins = {};
+						for (let i = 0; i < erc20Codes.length; i++)
+							newCoins[erc20Codes[i]] = { balance: balances[i] };
+						return merge(prev, newCoins);
+					});
+				}, (index + 1) * 100);
 			});
 		});
 	}
@@ -85,7 +93,7 @@ export const WalletMainScreen = props => {
 				<View
 					style={{
 						width: '100%',
-						height: '10%',
+						height: 60,
 						flexDirection: 'row',
 						justifyContent: 'space-between'
 					}}
@@ -96,7 +104,7 @@ export const WalletMainScreen = props => {
 				<View
 					style={{
 						width: '100%',
-						height: '50%',
+						height: 100,
 						flexDirection: 'column',
 						alignItems: 'center'
 					}}>
@@ -118,10 +126,10 @@ export const WalletMainScreen = props => {
 				</View>
 				<View
 					style={{
-						width: '70%',
-						height: '40%',
+						width: '50%',
+						height: 80,
 						flexDirection: 'row',
-						justifyContent: 'space-around'
+						justifyContent: 'space-between'
 					}}>
 					{[{
 						text: 'send',

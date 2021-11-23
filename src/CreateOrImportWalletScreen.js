@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Image } from 'react-native';
 import { Button } from 'react-native-paper';
 
@@ -39,7 +39,7 @@ export const CreateOrImportWalletScreen = props => {
 					<Button
 						disabled={props.disabled}
 						mode={'outlined'}
-						onPress={() => props.navigation.navigate('CreateWallet')}
+						onPress={() => props.navigation.navigate('CreateWallet.Main')}
 						style={{
 							width: '100%',
 							marginTop: 10

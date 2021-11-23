@@ -52,3 +52,4 @@ Listening on 0.0.0.0:8545
 Wallet: emre2
 
 Mnemonic:		cart raise horror property reduce relief bonus network unaware spring fury calm
+Ethereum address:	0x32773f36ce240c8DfC4b3EE80A26b8B5e1A3AF9b
