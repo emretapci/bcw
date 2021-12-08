@@ -118,7 +118,11 @@ const EnterTransactionDetailsScreen = props => {
 	const [transactionResult, setTransactionResult] = useState({ show: false });
 
 	useEffect(() => {
-		setToAddress(props.route.params?.toAddress);
+		var toAddress = props.route.params?.toAddress;
+		if (toAddress) {
+			toAddress = toAddress.substr(toAddress.indexOf('0x'));
+		}
+		setToAddress(toAddress);
 	}, [props.route.params?.toAddress]);
 
 	useEffect(() => {
