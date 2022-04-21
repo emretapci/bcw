@@ -1,4 +1,4 @@
-# Bitay Crypto Wallet React Native application
+# Crypto Wallet React Native application
 
 ## Android install
 
